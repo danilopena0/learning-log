@@ -1,0 +1,231 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "185ac97317ec7a2a7f7a2ae01ca575a8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"arrays-hash-maps\">Arrays &amp; Hash Maps</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-03-30</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>DSA</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Pattern</td>\n<td>Arrays &amp; Hash Maps</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Problems covered:</strong> Two Sum (LC #1) \u00b7 Valid Anagram (LC #242)</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "242e69e28ca5c713193f983a5153b95b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"concept-overview\">Concept Overview</h2>\n<span class=\"paragraph\">A <strong>hash map</strong> gives O(1) average-case lookups, inserts, and deletes \u2014 the key insight\nis that we can trade O(n) space to eliminate a nested loop and drop from O(n\u00b2) to O(n).\nThe three recurring use-cases are: <strong>complement/pair finding</strong> (store what you've seen,\ncheck if the needed partner exists), <strong>frequency counting</strong> (tally characters or values),\nand <strong>grouping</strong> (bucket items by a computed key).  Reach for a hash map any time you\ncatch yourself writing <code>for \u2026 for</code> just to answer \"have I seen X before?\" or \"how many\ntimes does X appear?\"</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "96866a763441d3ba0c81ea703052e6d3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"problem-1-two-sum-leetcode-1\">Problem 1 \u00b7 Two Sum \u2014 LeetCode #1</h2>\n<blockquote>\n<span class=\"paragraph\">Given an array of integers <code>nums</code> and an integer <code>target</code>, return the <strong>indices</strong> of\nthe two numbers that add up to <code>target</code>. You may assume exactly one solution exists\nand you may not use the same element twice.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>Constraints</strong></span>\n<ul>\n<li><code>2 \u2264 len(nums) \u2264 10\u2074</code></li>\n<li><code>-10\u2079 \u2264 nums[i] \u2264 10\u2079</code></li>\n<li>Exactly one valid answer exists.</li>\n</ul>\n<span class=\"paragraph\"><strong>Example</strong>\n<div class=\"language-text codehilite\"><pre><span></span><code>Input:  nums = [2, 7, 11, 15], target = 9\nOutput: [0, 1]   # nums[0] + nums[1] == 9\n</code></pre></div></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "e7108f65cf6a7929d0f92b4da813eaaa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "e097cb40a49ba5c6ace3ef8f9d999a07",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "8b481a4f729f175aa42818240c6e29b6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "All Two Sum tests passed!\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "Xref",
+      "code_hash": "31c6e33427a3929b90c5399038deb05e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"complexity-analysis-two-sum\">Complexity Analysis \u2014 Two Sum</h3>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>Time</th>\n<th>Space</th>\n<th>Notes</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Brute force</td>\n<td>O(n\u00b2)</td>\n<td>O(1)</td>\n<td>Two nested loops; no extra memory</td>\n</tr>\n<tr>\n<td>Hash map (1-pass)</td>\n<td>O(n)</td>\n<td>O(n)</td>\n<td>One scan; map holds at most n entries</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Trade-off:</strong> We spend O(n) extra memory to gain O(n) time \u2014 almost always the right\ncall in an interview. The map never stores more than n \u2212 1 entries because we return\nthe moment we find the complement.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "4540061278d3cfb26d17752be7db9e17",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"problem-2-valid-anagram-leetcode-242\">Problem 2 \u00b7 Valid Anagram \u2014 LeetCode #242</h2>\n<blockquote>\n<span class=\"paragraph\">Given two strings <code>s</code> and <code>t</code>, return <code>True</code> if <code>t</code> is an anagram of <code>s</code>,\nand <code>False</code> otherwise.  An anagram uses all the original letters exactly once.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>Constraints</strong></span>\n<ul>\n<li><code>1 \u2264 len(s), len(t) \u2264 5 \u00d7 10\u2074</code></li>\n<li><code>s</code> and <code>t</code> consist of lowercase English letters <em>(for the basic version)</em>.</li>\n</ul>\n<span class=\"paragraph\"><strong>Example</strong>\n<div class=\"language-text codehilite\"><pre><span></span><code>Input:  s = &quot;anagram&quot;, t = &quot;nagaram&quot;   \u2192  True\nInput:  s = &quot;rat&quot;,     t = &quot;car&quot;        \u2192  False\n</code></pre></div></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "ee942a33fcbc8f6a70029c4cd36dcc98",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "567848fdd8cd55114d06c24c91a345c8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "28ab6528114b1403b264d83a85ee993e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "30257c6400a9836cea29912dcfbead1e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "All Valid Anagram tests passed!\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "d709f2715ab542cd3ddb46b3530bd3ef",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"complexity-analysis-valid-anagram\">Complexity Analysis \u2014 Valid Anagram</h3>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>Time</th>\n<th>Space</th>\n<th>Notes</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Sorting</td>\n<td>O(n log n)</td>\n<td>O(n)</td>\n<td>Simple; creates sorted copies</td>\n</tr>\n<tr>\n<td>Counter / hash map</td>\n<td>O(n)</td>\n<td>O(k)</td>\n<td>k = unique chars; practical best choice</td>\n</tr>\n<tr>\n<td>Array of 26</td>\n<td>O(n)</td>\n<td>O(1)</td>\n<td>Fastest in practice; lowercase-only constraint</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">For the follow-up <em>\"what if inputs contain Unicode?\"</em> \u2014 the array approach breaks;\nuse <code>Counter</code> which handles arbitrary characters without code changes.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "8fb8cfd6917efe57ee6e24bb861ab240",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-recognition-hash-map-cheat-sheet\">Pattern Recognition \u2014 Hash Map Cheat Sheet</h2>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Go-to tool</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Need O(1) lookup of a value</td>\n<td><code>dict</code> / <code>set</code></td>\n</tr>\n<tr>\n<td>Count character / element frequency</td>\n<td><code>collections.Counter</code></td>\n</tr>\n<tr>\n<td>Count with a default value</td>\n<td><code>collections.defaultdict(int)</code></td>\n</tr>\n<tr>\n<td>Find complement / pair</td>\n<td>Store seen values as keys</td>\n</tr>\n<tr>\n<td>Group items by a computed key</td>\n<td><code>defaultdict(list)</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"other-leetcode-problems-using-the-same-pattern\">Other LeetCode problems using the same pattern</h3>\n<table>\n<thead>\n<tr>\n<th>Problem</th>\n<th>LC #</th>\n<th>Key idea</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Group Anagrams</td>\n<td>49</td>\n<td>Use sorted string as hash key to group</td>\n</tr>\n<tr>\n<td>Contains Duplicate</td>\n<td>217</td>\n<td>Set membership check in one pass</td>\n</tr>\n<tr>\n<td>Intersection of Two Arrays</td>\n<td>349</td>\n<td>Convert one array to set, scan the other</td>\n</tr>\n<tr>\n<td>Longest Consecutive Sequence</td>\n<td>128</td>\n<td>Set for O(1) lookup; only start chains at minima</td>\n</tr>\n<tr>\n<td>Subarray Sum Equals K</td>\n<td>560</td>\n<td>Prefix-sum + hash map for complement counts</td>\n</tr>\n<tr>\n<td>Top K Frequent Elements</td>\n<td>347</td>\n<td>Counter + heap or bucket sort</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "9c3e6de8c034aeb45012ea46da3e2944",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<h3 id=\"two-sum-30-second-explanation\">Two Sum \u2014 30-second explanation</h3>\n<blockquote>\n<span class=\"paragraph\">\"I'll do a single pass.  For each element I compute its complement\n<code>target - num</code> and check a hash map of values I've already seen.\nIf the complement is there I return both indices; otherwise I store\nthe current value.  One loop, O(n) time, O(n) space.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"common-follow-up-questions\">Common follow-up questions</h3>\n<span class=\"paragraph\"><strong>What if the array is already sorted?</strong>\nUse the <strong>two-pointer</strong> technique instead \u2014 left and right pointers converge\nin O(n) time with O(1) space, no hash map needed.</span>\n<span class=\"paragraph\"><strong>What if there are multiple valid pairs?</strong>\nCollect all pairs: don't return early, keep scanning and append each hit.\nBe careful with duplicates \u2014 decide whether the same index can appear in\nmultiple output pairs (usually not).</span>\n<span class=\"paragraph\"><strong>What if there are duplicate values?</strong>\nThe hash map stores the <em>most recent</em> index for a value.  If duplicates\ncould form a valid pair (e.g. <code>[3, 3], target=6</code>) this still works because\nwe check the complement <em>before</em> writing the current index into the map.</span>\n<span class=\"paragraph\"><strong>What about integer overflow?</strong>\nPython integers are arbitrary precision, so no issue.  In Java/C++ I'd\ncast to <code>long</code> before the addition.</span>\n<hr />\n<h3 id=\"timespace-trade-off\">Time\u2013Space trade-off</h3>\n<blockquote>\n<span class=\"paragraph\">\"I'm trading O(n) extra space for a factor-of-n speedup \u2014 going from\nO(n\u00b2) brute force to O(n).  In virtually every real-world scenario that\ntrade is worth it; memory is cheap and n can be large.  If memory is\ngenuinely constrained and the array is sorted, I'd switch to two pointers\nfor the O(1)-space solution.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
