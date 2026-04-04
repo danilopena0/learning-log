@@ -1,0 +1,294 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7c81afed81814479510b94f3ed7c0fe6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"sliding-window-two-pointers\">Sliding Window &amp; Two Pointers</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-02</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>DSA</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Patterns</td>\n<td>Sliding Window, Two Pointers</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Problems covered:</strong> Best Time to Buy/Sell Stock (LC #121) \u00b7 Container With Most Water (LC #11)</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "ec321a32a2904fa43b9bc36f3eaba3c9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"pattern-overview\">Pattern Overview</h2>\n<h3 id=\"two-pointers\">Two Pointers</h3>\n<span class=\"paragraph\"><strong>Use when:</strong> working with sorted arrays, or when you need to find pairs/subarrays satisfying a condition.</span>\n<span class=\"paragraph\"><strong>Core idea:</strong> maintain two indices that move toward each other (or in the same direction) to reduce O(n\u00b2) to O(n).</span>\n<span class=\"paragraph\"><strong>Two variants:</strong></span>\n<ol>\n<li><strong>Opposite ends \u2192 inward:</strong> start at both ends, converge based on a condition</li>\n<li><strong>Slow/fast (same direction):</strong> both pointers move forward, one ahead of the other</li>\n</ol>\n<hr />\n<h3 id=\"sliding-window\">Sliding Window</h3>\n<span class=\"paragraph\"><strong>Use when:</strong> finding optimal subarray/substring of variable or fixed length.</span>\n<span class=\"paragraph\"><strong>Core idea:</strong> maintain a window <code>[left, right]</code> that expands and contracts, tracking a running state.</span>\n<span class=\"paragraph\"><strong>Key insight:</strong> instead of recomputing from scratch for each subarray, update incrementally as the window slides.</span>\n<blockquote>\n<span class=\"paragraph\">The sliding window is the <strong>same-direction two-pointer variant with state tracking</strong>.</span>\n</blockquote>\n<hr />\n<h3 id=\"quick-decision-tree\">Quick Decision Tree</h3>\n<div class=\"language-gdscript codehilite\"><pre><span></span><code><span class=\"n\">Need</span><span class=\"w\"> </span><span class=\"n\">to</span><span class=\"w\"> </span><span class=\"n\">find</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"n\">pair</span><span class=\"w\"> </span><span class=\"ow\">in</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"n\">sorted</span><span class=\"w\"> </span><span class=\"n\">array</span><span class=\"err\">?</span><span class=\"w\">        </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">opposite</span><span class=\"o\">-</span><span class=\"n\">end</span><span class=\"w\"> </span><span class=\"n\">two</span><span class=\"w\"> </span><span class=\"n\">pointers</span>\n<span class=\"n\">Need</span><span class=\"w\"> </span><span class=\"n\">optimal</span><span class=\"w\"> </span><span class=\"n\">contiguous</span><span class=\"w\"> </span><span class=\"n\">subarray</span><span class=\"err\">?</span><span class=\"w\">             </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">sliding</span><span class=\"w\"> </span><span class=\"n\">window</span>\n<span class=\"n\">Need</span><span class=\"w\"> </span><span class=\"n\">to</span><span class=\"w\"> </span><span class=\"n\">compare</span><span class=\"w\"> </span><span class=\"n\">elements</span><span class=\"w\"> </span><span class=\"n\">from</span><span class=\"w\"> </span><span class=\"n\">both</span><span class=\"w\"> </span><span class=\"n\">ends</span><span class=\"err\">?</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">opposite</span><span class=\"o\">-</span><span class=\"n\">end</span><span class=\"w\"> </span><span class=\"n\">two</span><span class=\"w\"> </span><span class=\"n\">pointers</span>\n<span class=\"n\">Need</span><span class=\"w\"> </span><span class=\"nb\">min</span><span class=\"o\">/</span><span class=\"nb\">max</span><span class=\"w\"> </span><span class=\"n\">subarray</span><span class=\"w\"> </span><span class=\"n\">with</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"n\">constraint</span><span class=\"err\">?</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">sliding</span><span class=\"w\"> </span><span class=\"n\">window</span><span class=\"w\"> </span><span class=\"n\">with</span><span class=\"w\"> </span><span class=\"n\">expand</span><span class=\"o\">/</span><span class=\"n\">shrink</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "033994f4b44ef16f3f09da84d7f0bc73",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"problem-1-best-time-to-buy-and-sell-stock-leetcode-121\">Problem 1 \u00b7 Best Time to Buy and Sell Stock \u2014 LeetCode #121</h2>\n<blockquote>\n<span class=\"paragraph\">You are given an array <code>prices</code> where <code>prices[i]</code> is the price of a given stock on day <code>i</code>.\nChoose a <strong>single day to buy</strong> and a <strong>different future day to sell</strong> to maximize profit.\nReturn the maximum profit, or <code>0</code> if no profit is possible.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>Constraints</strong></span>\n<ul>\n<li><code>1 \u2264 len(prices) \u2264 10\u2075</code></li>\n<li><code>0 \u2264 prices[i] \u2264 10\u2074</code></li>\n</ul>\n<span class=\"paragraph\"><strong>Example</strong>\n<div class=\"language-text codehilite\"><pre><span></span><code>Input:  prices = [7, 1, 5, 3, 6, 4]\nOutput: 5   # buy at price 1 (day 1), sell at price 6 (day 4)\n</code></pre></div></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "dc92f2be2a1e88d208e84f7d1b6b6154",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "3873a6ba10509b0fb8095dc585e06b36",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "9ebf49c80b706e1c54a67b3e5da03183",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "d70f214c94c6662300f8979990589c16",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "All Best Time to Buy/Sell Stock tests passed!\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "4ec0acaf79bbe2f0f9e9d191f3f46ba6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"complexity-analysis-best-time-to-buy-and-sell-stock\">Complexity Analysis \u2014 Best Time to Buy and Sell Stock</h3>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>Time</th>\n<th>Space</th>\n<th>Why</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Brute</td>\n<td>O(n\u00b2)</td>\n<td>O(1)</td>\n<td>Every buy/sell pair checked</td>\n</tr>\n<tr>\n<td>Optimized</td>\n<td>O(n)</td>\n<td>O(1)</td>\n<td>Single pass tracking running minimum</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Why O(n) works:</strong> we only ever need the cheapest price seen <em>before</em> the current day.\nOne variable (<code>min_price_so_far</code>) is sufficient \u2014 there's no need to look back further.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "7bd9bb60c9eff9fe0a3e0ac97dd864b5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"problem-2-container-with-most-water-leetcode-11\">Problem 2 \u00b7 Container With Most Water \u2014 LeetCode #11</h2>\n<blockquote>\n<span class=\"paragraph\">Given <code>n</code> non-negative integers representing heights of vertical lines at positions <code>0..n-1</code>,\nfind two lines that together with the x-axis form a container holding the <strong>most water</strong>.</span>\n<span class=\"paragraph\"><code>area = min(height[left], height[right]) \u00d7 (right \u2212 left)</code></span>\n</blockquote>\n<span class=\"paragraph\"><strong>Constraints</strong></span>\n<ul>\n<li><code>2 \u2264 n \u2264 10\u2075</code></li>\n<li><code>0 \u2264 height[i] \u2264 10\u2074</code></li>\n</ul>\n<span class=\"paragraph\"><strong>Example</strong>\n<div class=\"language-text codehilite\"><pre><span></span><code>Input:  height = [1, 8, 6, 2, 5, 4, 8, 3, 7]\nOutput: 49   # lines at index 1 (h=8) and index 8 (h=7): min(8,7) \u00d7 7 = 49\n</code></pre></div></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "88b0312793c2569ea6c563d19c239f1f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "c699fe129dd070d2e6fb3353b9cd0289",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "06612721e88c447836a35325963921a5",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "5dac714ec62a336d4ef490bb7e18ab39",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"pointer-movement-trace-1-8-6-2-5-4-8-3-7\">Pointer Movement Trace \u2014 <code>[1, 8, 6, 2, 5, 4, 8, 3, 7]</code></h3>\n<span class=\"paragraph\">| Step | Left | H</span>\n<marimo-tex class=\"arithmatex\">||[\nL\n||]</marimo-tex><span class=\"paragraph\">| Right | H</span>\n<marimo-tex class=\"arithmatex\">||[\nR\n||]</marimo-tex><span class=\"paragraph\">| Width | Area   | Max    | Move                     |\n|------|------|---------|-------|---------|-------|--------|--------|--------------------------|\n| 1    | 0    | 1       | 8     | 7       | 8     | 8      | 8      | L\u2192 (1 \u2264 7)              |\n| 2    | 1    | 8       | 8     | 7       | 7     | <strong>49</strong> | <strong>49</strong> | \u2190R (7 &lt; 8)              |\n| 3    | 1    | 8       | 7     | 3       | 6     | 18     | 49     | \u2190R (3 &lt; 8)              |\n| 4    | 1    | 8       | 6     | 8       | 5     | 40     | 49     | L\u2192 (8 \u2264 8, tie \u2192 L)    |\n| 5    | 2    | 6       | 6     | 8       | 4     | 24     | 49     | L\u2192 (6 \u2264 8)             |\n| 6    | 3    | 2       | 6     | 8       | 3     | 6      | 49     | L\u2192 (2 \u2264 8)             |\n| 7    | 4    | 5       | 6     | 8       | 2     | 10     | 49     | L\u2192 (5 \u2264 8)             |\n| 8    | 5    | 4       | 6     | 8       | 1     | 4      | 49     | L\u2192 (4 \u2264 8)             |\n| \u2014    | L = R = 6 |   |       |         |       |        | <strong>49</strong> | done                     |</span>\n<span class=\"paragraph\">The optimal answer (area=49) is locked in at <strong>step 2</strong> (left=1, right=8).\nEvery step after that narrows the window \u2014 the algorithm is exhaustive yet linear.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "b64804484e8eed8e8c3583e44f80e659",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "All Container With Most Water tests passed!\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "iLit",
+      "code_hash": "4820d8f4a265cef7388397427469e13d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"complexity-analysis-container-with-most-water\">Complexity Analysis \u2014 Container With Most Water</h3>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>Time</th>\n<th>Space</th>\n<th>Why</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Brute</td>\n<td>O(n\u00b2)</td>\n<td>O(1)</td>\n<td>Every pair of lines checked</td>\n</tr>\n<tr>\n<td>Two Ptr</td>\n<td>O(n)</td>\n<td>O(1)</td>\n<td>Each pointer moves at most n steps total</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Why O(n) works:</strong> the two pointers start n\u22121 apart and each step closes the gap by exactly 1.\nAfter at most n\u22121 steps they meet \u2014 all candidates that could beat the current max are evaluated.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "73275f561c64296843ced6d72e2c8adc",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-comparison\">Pattern Comparison</h2>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>Buy/Sell Stock (#121)</th>\n<th>Container With Most Water (#11)</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Pattern</strong></td>\n<td>Sliding window (same-direction)</td>\n<td>Two pointers (opposite-end, converging)</td>\n</tr>\n<tr>\n<td><strong>Pointer move</strong></td>\n<td>Right always scans forward; left jumps to min</td>\n<td>Move the shorter side inward</td>\n</tr>\n<tr>\n<td><strong>Key insight</strong></td>\n<td>Only need the running minimum seen so far</td>\n<td>Safe to discard the shorter side \u2014 can't do better</td>\n</tr>\n<tr>\n<td><strong>State tracked</strong></td>\n<td><code>min_price_so_far</code>, <code>best_profit</code></td>\n<td><code>max_area</code></td>\n</tr>\n<tr>\n<td><strong>Why O(n) works</strong></td>\n<td>Each element visited exactly once</td>\n<td>Each pointer moves at most n steps total</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "61d8a7ff87f54b9037a20d498d98f821",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"related-problems-to-practice\">Related Problems to Practice</h2>\n<h3 id=\"sliding-window-same-direction-two-pointers-with-state\">Sliding Window (same-direction two pointers with state)</h3>\n<table>\n<thead>\n<tr>\n<th>Problem</th>\n<th>LC #</th>\n<th>Note</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Longest Substring Without Repeating Characters</td>\n<td>#3</td>\n<td>Classic variable-length window; shrink when duplicate enters</td>\n</tr>\n<tr>\n<td>Minimum Window Substring</td>\n<td>#76</td>\n<td>Expand right until valid, then shrink left \u2014 two-phase window</td>\n</tr>\n<tr>\n<td>Max Consecutive Ones III</td>\n<td>#1004</td>\n<td>Window with a \"budget\": at most K zeros flipped</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"two-pointers-opposite-ends-high-interview-frequency\">Two Pointers \u2014 Opposite Ends \u2b50 <em>high interview frequency</em></h3>\n<table>\n<thead>\n<tr>\n<th>Problem</th>\n<th>LC #</th>\n<th>Note</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>3Sum</strong></td>\n<td><strong>#15</strong></td>\n<td>\u2b50 Sort + outer loop + inner two-pointer scan; very common</td>\n</tr>\n<tr>\n<td><strong>Trapping Rain Water</strong></td>\n<td><strong>#42</strong></td>\n<td>\u2b50 Track running max from both sides; same move logic as Container</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"two-pointers-same-direction\">Two Pointers \u2014 Same Direction</h3>\n<table>\n<thead>\n<tr>\n<th>Problem</th>\n<th>LC #</th>\n<th>Note</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Remove Duplicates from Sorted Array</td>\n<td>#26</td>\n<td>Slow pointer marks next write position</td>\n</tr>\n<tr>\n<td>Move Zeroes</td>\n<td>#283</td>\n<td>Slow pointer tracks next non-zero slot</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\"><strong>Prioritize 3Sum (#15) and Trapping Rain Water (#42)</strong> \u2014 these appear constantly in\nFAANG screens and build directly on the patterns practiced today.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "c9733d4063543a951e667e7dae2cbf11",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<h3 id=\"walk-me-through-container-with-most-water-45-second-scripted-answer\">\"Walk me through Container With Most Water\" \u2014 45-second scripted answer</h3>\n<blockquote>\n<span class=\"paragraph\">\"The brute force checks every pair in O(n\u00b2). To optimize, I notice that area is always\nlimited by the shorter of the two walls. So I start with the widest container \u2014 pointers\nat both ends. Each step I move the shorter pointer inward, because moving the taller one\ncan only reduce width without possibly raising the height limit. Moving the shorter one\nmight find a taller wall and increase area despite the narrower width. That's the proof\nof correctness: we never skip the optimal pair. After at most n\u22121 moves the pointers\nmeet \u2014 O(n) time, O(1) space.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"why-not-use-a-sliding-window-for-container-with-most-water\">\"Why not use a sliding window for Container With Most Water?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Sliding window is for contiguous subarrays where I track running state as the window\ngrows and shrinks. Here I'm not processing a contiguous range \u2014 I'm comparing two\nspecific endpoints. Opposite-end two pointers is the right model because I need to\nsystematically eliminate pairs, not maintain a window with incremental state.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"whats-the-difference-between-sliding-window-and-two-pointers\">\"What's the difference between sliding window and two pointers?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Two pointers is the broader technique \u2014 two indices traversing a structure to avoid\nO(n\u00b2) pair enumeration. Sliding window is one specific application: same-direction two\npointers where you maintain a contiguous window and track running state (sum, character\ncounts, etc.). All sliding windows are two-pointer problems, but not the reverse.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"follow-up-for-buysell-stock-what-if-you-can-do-multiple-transactions\">Follow-up for Buy/Sell Stock: \"What if you can do multiple transactions?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"That's LC #122. With unlimited transactions, greedy works: sum every consecutive\nascending pair \u2014 <code>sum(max(0, prices[i+1] - prices[i]) for i in range(n-1))</code>.\nIt's a different pattern from the sliding window here \u2014 no pointer tracking needed.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"connection-to-real-work\">Connection to real work</h3>\n<blockquote>\n<span class=\"paragraph\">\"The sliding window pattern shows up directly in my backtesting engine \u2014 scanning a\nprice series with a trailing window to compute rolling indicators (20-day moving\naverage, rolling volatility) is the same idea: maintain running state as the window\nadvances, update incrementally rather than recomputing from scratch each bar.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

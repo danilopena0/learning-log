@@ -1,0 +1,341 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4575439ae0567ba547ba1390799bb192",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"bias-variance-tradeoff-overfitting-regularization-l1l2\">Bias-Variance Tradeoff, Overfitting &amp; Regularization (L1/L2)</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-03-31</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>ML Theory</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topics</td>\n<td>Bias-Variance Tradeoff \u00b7 Overfitting \u00b7 Ridge \u00b7 Lasso \u00b7 Elastic Net</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "366a22fc181b201e41d63e455e367036",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"bias-variance-tradeoff\">Bias-Variance Tradeoff</h2>\n<span class=\"paragraph\"><strong>Bias</strong> is the error from a model that is too simple to capture the true underlying\npattern \u2014 it systematically misses the signal (underfitting).  <strong>Variance</strong> is the error\nfrom a model that is so complex it latches onto the noise in the training data and fails\nto generalize (overfitting).  The tradeoff is a fundamental tension: as you increase model\ncomplexity to reduce bias, variance grows, and vice versa.  The goal is to find the sweet\nspot where <em>total</em> error (bias\u00b2 + variance + irreducible noise) is minimized.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "c06009392bf8741108dd967c7944d993",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'matplotlib' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'mpatches' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'np' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'rng' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "c9e21ba83a70ccb66702e7de9b6dcea2",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'matplotlib' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'np' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "5218d392f8812a51d7055c1810180d5f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"overfitting-deep-dive\">Overfitting Deep Dive</h2>\n<span class=\"paragraph\">Overfitting shows up most clearly when you compare training and validation metrics over\ntime.  <strong>Signs to watch for:</strong></span>\n<ul>\n<li>Training loss keeps dropping while validation loss plateaus or climbs \u2014 the model is\n  memorizing training examples, not learning the underlying pattern.</li>\n<li>A large gap between train accuracy (~99%) and val accuracy (~70%) in the same epoch.</li>\n<li>Very large weight magnitudes \u2014 the model has learned spurious correlations that require\n  extreme weights to encode.</li>\n<li>Predictions are brittle: slightly perturbed inputs produce wildly different outputs.</li>\n</ul>\n<span class=\"paragraph\">The practical fix is to monitor val loss and stop training at its minimum (<strong>early stopping</strong>).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "b250a72c96fbc4635fc4d098b30adb7c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'matplotlib' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'np' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'rng' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "29ac51289ddc1ddc4c15d3c069b9cc0f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"regularization\">Regularization</h2>\n<h3 id=\"l2-regularization-ridge\">L2 Regularization (Ridge)</h3>\n<span class=\"paragraph\">Ridge adds a penalty proportional to the <strong>sum of squared weights</strong> to the loss:</span>\n<marimo-tex class=\"arithmatex\">||[\\mathcal{L}_{ridge} = \\mathcal{L}_{base} + \\lambda \\sum_j w_j^2||]</marimo-tex><span class=\"paragraph\"><strong>Effect:</strong> Weights are shrunk toward zero but rarely reach exactly zero \u2014 every feature\nretains a small influence.  <strong>Geometric intuition:</strong> The feasible weight region is a\n<strong>sphere</strong> (ellipse in 2D).  Loss contours typically meet the sphere at a smooth point\noff the axes, so no coefficient goes to exactly zero.  <strong>When to use:</strong> You believe most\nfeatures carry real signal but want to prevent any single feature from dominating (e.g.\ncollinear features, large-weight instability).  \u03bb controls the strength: larger \u03bb \u2192 more\nshrinkage \u2192 higher bias, lower variance.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "5e7dd795acebae2f20bc6cb7c84daf1c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"l1-regularization-lasso\">L1 Regularization (Lasso)</h3>\n<span class=\"paragraph\">Lasso adds a penalty proportional to the <strong>sum of absolute weight values</strong>:</span>\n<marimo-tex class=\"arithmatex\">||[\\mathcal{L}_{lasso} = \\mathcal{L}_{base} + \\lambda \\sum_j |w_j|||]</marimo-tex><span class=\"paragraph\"><strong>Effect:</strong> Drives some weights to <em>exactly</em> zero \u2014 this is built-in <strong>feature selection</strong>.\n<strong>Geometric intuition:</strong> The feasible region is a <strong>diamond</strong> (rhombus in 2D).  The corners\nof the diamond sit exactly on the axes (one coordinate = 0), and loss contours are likely\nto first touch the constraint region at one of those corners, zeroing out a coefficient.\n<strong>When to use:</strong> You suspect many features are irrelevant and want a sparse model that is\neasier to interpret.  Especially powerful in high-dimensional settings (p &gt;&gt; n).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "68fb221a0b286c39fb7965674d4f5285",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'matplotlib' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'mpatches' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'np' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "9a90fe45db00e1fa7f27cac721f56a8c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ax' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'matplotlib' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'np' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'plt' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'rng' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "f4b450b97fa848e761dc3f8045343ac5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"elastic-net-bonus\">Elastic Net (Bonus)</h2>\n<span class=\"paragraph\"><strong>Elastic Net</strong> combines L1 and L2 penalties:\n$<marimo-tex class=\"arithmatex\">||(\\mathcal{L}_{EN} = \\mathcal{L}_{base} + \\lambda \\left[        ext{l1\\_ratio} \\cdot \\sum|w_j| + \nrac{1 -       ext{l1\\_ratio}}{2} \\cdot \\sum w_j^2 \night]||)</marimo-tex>$</span>\n<span class=\"paragraph\">The <code>l1_ratio</code> parameter blends the two: <code>1.0</code> = pure Lasso, <code>0.0</code> = pure Ridge.  Reach\nfor Elastic Net when you want Lasso's sparsity but your features are <strong>correlated</strong> \u2014\nLasso tends to arbitrarily pick one correlated feature and zero the rest, while Elastic Net\nhandles groups of correlated features more gracefully.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "e13bc6820c9afb07abcc82101b36fac5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"flashcard-style-summary\">Flashcard-Style Summary</h2>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>Answer</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>What is bias?</td>\n<td>Error from a model that is too simple to capture the true pattern \u2014 systematic underfitting.</td>\n</tr>\n<tr>\n<td>What is variance?</td>\n<td>Error from a model so complex it fits noise in the training set and fails to generalize.</td>\n</tr>\n<tr>\n<td>What happens as model complexity increases?</td>\n<td>Bias decreases, variance increases; total error follows a U-shape with an optimal sweet spot.</td>\n</tr>\n<tr>\n<td>How does L1 differ from L2?</td>\n<td>L1 adds an absolute-value penalty (can zero weights \u2192 sparse); L2 adds a squared penalty (shrinks weights but keeps all non-zero).</td>\n</tr>\n<tr>\n<td>Why does L1 produce sparse solutions?</td>\n<td>The L1 constraint region is a diamond; loss contours tend to first touch it at a corner where one or more weights are exactly zero.</td>\n</tr>\n<tr>\n<td>When would you choose Ridge over Lasso?</td>\n<td>When you believe most features are relevant and just want to prevent large weights \u2014 especially with correlated features.</td>\n</tr>\n<tr>\n<td>What is the bias-variance tradeoff?</td>\n<td>Reducing bias (more complex model) increases variance and vice versa; the goal is to minimize total error at the optimal complexity.</td>\n</tr>\n<tr>\n<td>How do you detect overfitting?</td>\n<td>Training loss keeps decreasing while validation loss plateaus or rises; large train/val performance gap; very large weight magnitudes.</td>\n</tr>\n<tr>\n<td>What does the regularization parameter \u03bb control?</td>\n<td>The strength of the penalty: larger \u03bb \u2192 stronger regularization \u2192 more shrinkage \u2192 higher bias, lower variance.</td>\n</tr>\n<tr>\n<td>What's Elastic Net?</td>\n<td>A combination of L1 and L2 regularization controlled by l1_ratio; balances sparsity (L1) with correlated-feature stability (L2).</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "71c7eb2364ff6ed05528c007c307755c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<hr />\n<h3 id=\"walk-me-through-the-bias-variance-tradeoff\">\"Walk me through the bias-variance tradeoff.\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Every model makes a bias-variance tradeoff.  A model with high bias is too simple \u2014\nit consistently misses the signal and underfits.  A model with high variance is too\ncomplex \u2014 it memorizes noise and fails on new data.  As you increase complexity, bias\ndrops but variance rises, so total error forms a U-shape.  The optimal model sits at\nthe bottom of that U.  In practice you tune this via model selection (polynomial degree,\ntree depth, number of layers) and regularization.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"how-do-you-prevent-overfitting\">\"How do you prevent overfitting?\"</h3>\n<ol>\n<li><strong>More data</strong> \u2014 the single most effective lever when available.</li>\n<li><strong>Regularization</strong> \u2014 L1/L2 penalize complexity directly in the loss.</li>\n<li><strong>Dropout</strong> (neural nets) \u2014 randomly deactivates neurons during training.</li>\n<li><strong>Early stopping</strong> \u2014 halt training when validation loss starts rising.</li>\n<li><strong>Cross-validation</strong> \u2014 use k-fold CV so your metric reflects generalization, not memorization.</li>\n<li><strong>Simpler model</strong> \u2014 reduce depth, features, or parameters.</li>\n</ol>\n<hr />\n<h3 id=\"explain-l1-vs-l2-regularization\">\"Explain L1 vs L2 regularization.\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Both add a penalty term to the loss function that discourages large weights.  L2 (Ridge)\npenalizes the <em>sum of squared weights</em> \u2014 it shrinks all weights toward zero but never\nexactly zero.  L1 (Lasso) penalizes the <em>sum of absolute weights</em> \u2014 it can drive weights\nto exactly zero, giving built-in feature selection.  Geometrically, L2's constraint region\nis a sphere so the loss contour meets it smoothly; L1's region is a diamond and contours\ntend to hit the corners, which sit on an axis \u2014 zeroing a coefficient.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"common-follow-up-when-would-you-not-use-regularization\">Common follow-up: \"When would you NOT use regularization?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"When your model is already simple relative to the data \u2014 for instance, a linear model\non a small dataset with only a handful of features.  Adding regularization in that\nscenario increases bias without meaningfully reducing variance, and you may end up\nwith a worse model.  Also, if you have a huge amount of data, regularization matters\nless because variance is naturally controlled by sample size.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
