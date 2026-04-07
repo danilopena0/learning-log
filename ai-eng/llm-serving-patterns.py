@@ -104,10 +104,18 @@ def tool_calling_concept(mo):
 
 
 @app.cell
-def tool_calling_code():
+def shared_imports():
     import json
-    from typing import Any
+    import re
+    import time
+    import random
+    from typing import Any, Optional, Callable
+    from dataclasses import dataclass, field
+    return json, re, time, random, Any, Optional, Callable, dataclass, field
 
+
+@app.cell
+def tool_calling_code(json, Any):
     # ── Step 1: Define tool schemas (OpenAI / Anthropic format) ──────────────────
     # These are what you send to the LLM alongside your prompt.
     # The LLM reads these and decides which one(s) to call.
@@ -368,12 +376,7 @@ def structured_outputs_concept(mo):
 
 
 @app.cell
-def structured_outputs_code():
-    import json
-    import re
-    from dataclasses import dataclass
-    from typing import Optional
-
+def structured_outputs_code(json, re, dataclass, Optional):
     # ── Define the schema as a Pydantic model ────────────────────────────────────
     # This is the CONTRACT between the LLM and your downstream system.
     # Every field is typed. Downstream code can trust this structure.
@@ -610,12 +613,7 @@ def guardrails_concept(mo):
 
 
 @app.cell
-def guardrails_code():
-    import re
-    import json
-    from dataclasses import dataclass, field
-    from typing import Callable, Any, Optional
-
+def guardrails_code(re, json, dataclass, field, Callable, Any, Optional):
     # ── Define the guardrail result contract ─────────────────────────────────────
 
     @dataclass
@@ -871,13 +869,7 @@ def evals_concept(mo):
 
 
 @app.cell
-def evals_code():
-    import time
-    import json
-    import random
-    from dataclasses import dataclass, field
-    from typing import Callable, Optional, Any
-
+def evals_code(time, json, random, dataclass, field, Callable, Optional, Any):
     # ── Data structures ──────────────────────────────────────────────────────────
 
     @dataclass
