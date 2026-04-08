@@ -1,0 +1,205 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "c8c85f3f7ca3dd9628f66ec590d4648a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"linear-logistic-regression-from-scratch\">Linear &amp; Logistic Regression from Scratch</h1>\n<h2 id=\"gradient-descent-loss-functions-decision-boundaries\">Gradient Descent \u00b7 Loss Functions \u00b7 Decision Boundaries</h2>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-03</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>ML Theory</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topics</td>\n<td>Linear Regression \u00b7 Logistic Regression \u00b7 Gradient Descent \u00b7 MSE \u00b7 Binary Cross-Entropy \u00b7 Decision Boundaries</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "a48c5549a40f95f45503f6c1823ee57d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"part-1-linear-regression-from-scratch\">Part 1: Linear Regression from Scratch</h2>\n<span class=\"paragraph\"><strong>What it does:</strong> Finds the line (or hyperplane) that minimizes the sum of squared errors\nbetween predictions and targets.</span>\n<span class=\"paragraph\"><strong>The model:</strong> <marimo-tex class=\"arithmatex\">||(y = Xw + b||)</marimo-tex>\n(equivalently <marimo-tex class=\"arithmatex\">||(y = \\tilde{X}\\tilde{w}||)</marimo-tex> with bias absorbed into the design matrix,\n<marimo-tex class=\"arithmatex\">||(\\tilde{X} = [X \\mid \\mathbf{1}]||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(\\tilde{w} = [w;\\, b]||)</marimo-tex>)</span>\n<span class=\"paragraph\"><strong>Why \"linear\"?</strong> Linear in the <em>parameters</em> \u2014 the output is a weighted sum of features.\nFeatures can be nonlinear (<marimo-tex class=\"arithmatex\">||(x^2||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(\\sin x||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(\\log x||)</marimo-tex>) and the model is still \"linear.\"\nInterviewers probe this distinction; it is worth having a crisp answer ready.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "660d9e28cf52f379c6b230e2f5fa4412",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "4b3d49b8097a51653c0e869b05f69406",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"loss-function-mean-squared-error-mse\">Loss Function: Mean Squared Error (MSE)</h3>\n<marimo-tex class=\"arithmatex\">||[L = \\frac{1}{n} \\sum_{i=1}^{n} (\\hat{y}_i - y_i)^2||]</marimo-tex><span class=\"paragraph\"><strong>Why squared?</strong></span>\n<ul>\n<li>Penalizes large errors disproportionately \u2014 a <marimo-tex class=\"arithmatex\">||(2\\times||)</marimo-tex> error costs <marimo-tex class=\"arithmatex\">||(4\\times||)</marimo-tex> as much</li>\n<li>Differentiable everywhere; gradient descent can follow it all the way to the minimum</li>\n<li>For linear models, MSE is <strong>strictly convex</strong> \u2014 one global minimum, no local traps</li>\n<li>Without squaring, positive and negative residuals cancel; the model could be wildly wrong</li>\n</ul>\n<span class=\"paragraph\"><strong>Gradients</strong> (direction of steepest <em>ascent</em> in loss \u2014 gradient descent steps opposite):</span>\n<marimo-tex class=\"arithmatex\">||[\\frac{\\partial L}{\\partial w} = \\frac{2}{n}\\, X^T (Xw + b - y)||]</marimo-tex><marimo-tex class=\"arithmatex\">||[\\frac{\\partial L}{\\partial b} = \\frac{2}{n} \\sum_{i=1}^{n} (X_i w + b - y_i)||]</marimo-tex></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "f2e62fcf08712e6334bed16142d4cd83",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "58569cc88cbfc37832591565a740eb5d",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "44646671fed1870c0faae2ccb08ba4d7",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "332a16515a6bf659f00c3a289b087351",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"closed-form-solution-the-normal-equation\">Closed-Form Solution: The Normal Equation</h3>\n<span class=\"paragraph\">For linear regression with MSE loss, there is an exact analytic solution:</span>\n<marimo-tex class=\"arithmatex\">||[\\hat{w} = (X^T X)^{-1} X^T y||]</marimo-tex><span class=\"paragraph\">In code, one line of NumPy suffices:</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"n\">X_aug</span> <span class=\"o\">=</span> <span class=\"n\">np</span><span class=\"o\">.</span><span class=\"n\">column_stack</span><span class=\"p\">([</span><span class=\"n\">X</span><span class=\"p\">,</span> <span class=\"n\">np</span><span class=\"o\">.</span><span class=\"n\">ones</span><span class=\"p\">(</span><span class=\"n\">n</span><span class=\"p\">)])</span>        <span class=\"c1\"># absorb bias</span>\n<span class=\"n\">w_cf</span>  <span class=\"o\">=</span> <span class=\"n\">np</span><span class=\"o\">.</span><span class=\"n\">linalg</span><span class=\"o\">.</span><span class=\"n\">solve</span><span class=\"p\">(</span><span class=\"n\">X_aug</span><span class=\"o\">.</span><span class=\"n\">T</span> <span class=\"o\">@</span> <span class=\"n\">X_aug</span><span class=\"p\">,</span> <span class=\"n\">X_aug</span><span class=\"o\">.</span><span class=\"n\">T</span> <span class=\"o\">@</span> <span class=\"n\">y</span><span class=\"p\">)</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>Why not always use the closed form?</strong></span>\n<ul>\n<li>Matrix inversion is <marimo-tex class=\"arithmatex\">||(O(d^3)||)</marimo-tex> in number of features <marimo-tex class=\"arithmatex\">||(d||)</marimo-tex> \u2014 catastrophic at scale\n  (GPT-level models have billions of parameters; inverting that matrix is infeasible)</li>\n<li>Requires the full data in memory at once</li>\n<li>Does not generalize to non-MSE losses or non-linear models</li>\n<li><strong>Gradient descent is <marimo-tex class=\"arithmatex\">||(O(d)||)</marimo-tex> per step</strong> and works for any differentiable loss</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "e48940ee130e330cf573ced70f53fe73",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "f02d5813b698c4d2a380f21e718e0604",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"part-2-logistic-regression-from-scratch\">Part 2: Logistic Regression from Scratch</h2>\n<span class=\"paragraph\"><strong>What it does:</strong> Classification by modeling <marimo-tex class=\"arithmatex\">||(P(y=1 \\mid x)||)</marimo-tex> using the sigmoid function.</span>\n<span class=\"paragraph\"><strong>Key insight:</strong> Logistic regression is linear regression passed through a sigmoid to\nsquash outputs to <marimo-tex class=\"arithmatex\">||([0, 1]||)</marimo-tex>, giving interpretable probabilities.</span>\n<marimo-tex class=\"arithmatex\">||[P(y=1 \\mid x) = \\sigma(Xw + b) \\qquad \\text{where} \\qquad \\sigma(z) = \\frac{1}{1 + e^{-z}}||]</marimo-tex><span class=\"paragraph\"><strong>Despite the name, logistic regression is a <em>classifier</em>, not a regressor.</strong>\nInterviewers will ask this \u2014 be ready to explain why: the output is a probability (0\u20131),\nand we threshold at 0.5 to produce a binary decision.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "4768ea10e0672f30ccaaf2c585318ed9",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "8eb149054c0e8f762f62e5aa18adc739",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "865e02d7ee8b46465a763a153ae1c19c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"loss-function-binary-cross-entropy-log-loss\">Loss Function: Binary Cross-Entropy (Log Loss)</h3>\n<marimo-tex class=\"arithmatex\">||[L = -\\frac{1}{n} \\sum_{i=1}^{n} \\left[ y_i \\log p_i + (1 - y_i) \\log(1 - p_i) \\right]||]</marimo-tex><span class=\"paragraph\">where <marimo-tex class=\"arithmatex\">||(p_i = \\sigma(X_i w + b)||)</marimo-tex>.</span>\n<span class=\"paragraph\"><strong>Why not MSE for classification?</strong>\nMSE + sigmoid creates a <strong>non-convex</strong> loss surface with local minima \u2014 gradient descent\ncan get stuck. Binary cross-entropy is convex when composed with the sigmoid, so gradient\ndescent always finds the global minimum.</span>\n<span class=\"paragraph\"><strong>Gradients:</strong></span>\n<marimo-tex class=\"arithmatex\">||[\\frac{\\partial L}{\\partial w} = \\frac{1}{n}\\, X^T \\left(\\sigma(Xw + b) - y\\right)||]</marimo-tex><marimo-tex class=\"arithmatex\">||[\\frac{\\partial L}{\\partial b} = \\frac{1}{n} \\sum_{i=1}^{n} \\left(\\sigma(X_i w + b) - y_i\\right)||]</marimo-tex><span class=\"paragraph\"><strong>Note:</strong> The gradient has the <em>same form</em> as linear regression \u2014 <marimo-tex class=\"arithmatex\">||(X^T(\\text{predictions} - \\text{targets})||)</marimo-tex> \u2014 just with the sigmoid baked in.  The math works out beautifully.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "7bba7024ec8152c975397d96b7bc035b",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "0684638f39c591636d6e6c9314bf3d1c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "2790012f4b560ff3d20127f7aa364c15",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "0d56350b145774f56c6de87b5b53310d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"part-3-connecting-the-two\">Part 3: Connecting the Two</h2>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>Linear Regression</th>\n<th>Logistic Regression</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Task</strong></td>\n<td>Regression \u2014 continuous output</td>\n<td>Classification \u2014 binary decision</td>\n</tr>\n<tr>\n<td><strong>Model</strong></td>\n<td><marimo-tex class=\"arithmatex\">||(y = Xw + b||)</marimo-tex></td>\n<td><marimo-tex class=\"arithmatex\">||(P(y=1) = \\sigma(Xw + b)||)</marimo-tex></td>\n</tr>\n<tr>\n<td><strong>Loss</strong></td>\n<td>MSE</td>\n<td>Binary cross-entropy</td>\n</tr>\n<tr>\n<td><strong>Output range</strong></td>\n<td><marimo-tex class=\"arithmatex\">||((-\\infty,\\, +\\infty)||)</marimo-tex></td>\n<td><marimo-tex class=\"arithmatex\">||((0,\\, 1)||)</marimo-tex></td>\n</tr>\n<tr>\n<td><strong>Decision boundary</strong></td>\n<td>N/A</td>\n<td>Where <marimo-tex class=\"arithmatex\">||(\\sigma(Xw+b) = 0.5||)</marimo-tex>, i.e. <marimo-tex class=\"arithmatex\">||(Xw+b = 0||)</marimo-tex></td>\n</tr>\n<tr>\n<td><strong>Loss landscape</strong></td>\n<td>Convex (GD or closed-form)</td>\n<td>Convex (GD only)</td>\n</tr>\n<tr>\n<td><strong>Gradient form</strong></td>\n<td><marimo-tex class=\"arithmatex\">||(X^T(Xw+b - y)||)</marimo-tex></td>\n<td><marimo-tex class=\"arithmatex\">||(X^T(\\sigma(Xw+b) - y)||)</marimo-tex></td>\n</tr>\n<tr>\n<td><strong>Regularization</strong></td>\n<td>Ridge (L2), Lasso (L1)</td>\n<td>Same \u2014 very common in practice</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>The unifying pattern:</strong> Both models share the same gradient <em>structure</em> \u2014 the difference\nis only whether you apply a sigmoid or not.  The sigmoid is what makes logistic regression\na classifier and changes the loss from MSE to cross-entropy.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "2e12e270d3342bf2e119e2af13388af2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"when-to-use-which\">When to Use Which</h3>\n<span class=\"paragraph\"><strong>Linear regression:</strong></span>\n<ul>\n<li>Predicting a continuous value \u2014 price, temperature, revenue, time-to-event</li>\n<li>When you need an interpretable coefficient for each feature</li>\n<li>When residuals are approximately Gaussian</li>\n</ul>\n<span class=\"paragraph\"><strong>Logistic regression:</strong></span>\n<ul>\n<li>Binary classification with calibrated probabilities \u2014 churn, fraud, click, default</li>\n<li>When you need a fast, interpretable baseline before trying complex models</li>\n<li>When the decision boundary is roughly linear in feature space</li>\n<li>When model size and training speed matter</li>\n</ul>\n<span class=\"paragraph\"><strong>Rule of thumb:</strong> Logistic regression is almost always the first model to try for\nclassification.  It is fast, interpretable, and probabilistic.\n<em>\"If logistic regression works well enough, you probably don't need anything fancier.\"</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "c80b81a43c916ec87718db1c89f41f2f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>Answer</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>What loss does linear regression use?</td>\n<td>MSE \u2014 mean squared error</td>\n</tr>\n<tr>\n<td>Why not MSE for logistic regression?</td>\n<td>MSE + sigmoid is non-convex; log loss is convex, so GD is guaranteed to find the global minimum</td>\n</tr>\n<tr>\n<td>What does the sigmoid do?</td>\n<td>Squashes any real number to (0, 1) \u2014 maps the linear score to a probability</td>\n</tr>\n<tr>\n<td>What is the decision boundary?</td>\n<td>The hyperplane where <marimo-tex class=\"arithmatex\">||(P(y=1) = 0.5||)</marimo-tex>, i.e. <marimo-tex class=\"arithmatex\">||(Xw+b=0||)</marimo-tex></td>\n</tr>\n<tr>\n<td>Why use gradient descent over the normal equation?</td>\n<td>Scales to large datasets; works for any differentiable loss; the normal equation requires <marimo-tex class=\"arithmatex\">||(O(d^3)||)</marimo-tex> matrix inversion</td>\n</tr>\n<tr>\n<td>What happens if learning rate is too high?</td>\n<td>Loss oscillates or diverges \u2014 the update overshoots the minimum each step</td>\n</tr>\n<tr>\n<td>What does \"linear in the parameters\" mean?</td>\n<td>The output is a weighted sum of the features; even if features are nonlinear, the model is still linear</td>\n</tr>\n<tr>\n<td>How do you regularize logistic regression?</td>\n<td>L1 (Lasso) for sparsity, L2 (Ridge) for shrinkage \u2014 add penalty to weights in the loss</td>\n</tr>\n<tr>\n<td>What is the gradient of logistic regression?</td>\n<td><marimo-tex class=\"arithmatex\">||(X^T(\\sigma(Xw+b) - y)||)</marimo-tex> \u2014 same form as linear regression, sigmoid baked in</td>\n</tr>\n<tr>\n<td>When pick logistic over a neural net?</td>\n<td>Interpretability, small data, fast baseline, calibrated probabilities, regulatory requirements</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "5226a285e28dce1b0fd95b3f83ec9a66",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<hr />\n<h3 id=\"walk-me-through-gradient-descent\">\"Walk me through gradient descent.\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Start by initializing the model weights \u2014 often randomly or at zero.  Then iterate:\ncompute the loss on the current batch, compute the gradient of the loss with respect to\neach parameter (the direction of steepest ascent), and step the parameters in the\n<em>opposite</em> direction by a small amount controlled by the learning rate.  Repeat until\nthe loss stops improving.  The key insight is that for convex losses like MSE and\nlog loss, this process is guaranteed to find the global minimum.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"implement-logistic-regression-from-scratch\">\"Implement logistic regression from scratch.\"</h3>\n<span class=\"paragraph\">Walk through this notebook cell by cell:</span>\n<ol>\n<li>Generate binary classification data</li>\n<li>Define sigmoid and binary cross-entropy loss</li>\n<li>Compute gradients: <code>X.T @ (sigmoid(Xw + b) - y) / n</code></li>\n<li>Gradient descent loop: predict \u2192 loss \u2192 gradient \u2192 update</li>\n<li>Visualize the decision boundary as the line where <code>Xw + b = 0</code></li>\n</ol>\n<hr />\n<h3 id=\"what-is-the-difference-between-linear-and-logistic-regression\">\"What is the difference between linear and logistic regression?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Same optimization algorithm, same gradient structure \u2014 the difference is the output\ntransformation and the loss function.  Linear regression predicts a continuous value\ndirectly; logistic regression passes the linear score through a sigmoid to get a\nprobability, and swaps MSE for cross-entropy to preserve convexity.  Both use gradient\ndescent; linear regression also has a closed-form normal equation, while logistic does not.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"connection-to-my-work\">Connection to my work</h3>\n<blockquote>\n<span class=\"paragraph\">\"In my backtesting engine, I use similar optimization patterns \u2014 iteratively updating\nportfolio weights to minimize a loss function over historical data, which is fundamentally\nthe same gradient-based approach.  The difference is the loss function: instead of MSE or\ncross-entropy, I'm minimizing something like negative Sharpe ratio or drawdown.  The\nupdate rule is the same structure.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "22cb2cd01c02254648f1d684cbbefcea",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"llm-serving-patterns\">LLM Serving Patterns</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-05</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>AI Engineering</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topic</td>\n<td>Tool Calling \u00b7 Structured Outputs \u00b7 Guardrails \u00b7 Evals</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "ed414e5ad93c3cecbf0d89f2f423307c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"llm-application-architecture-overview\">LLM Application Architecture Overview</h2>\n<span class=\"paragraph\">The full stack for a production LLM application:</span>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"n\">User</span><span class=\"w\"> </span><span class=\"n\">Input</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Input</span><span class=\"w\"> </span><span class=\"n\">Guardrails</span><span class=\"p\">]</span><span class=\"w\">      </span><span class=\"p\">(</span><span class=\"n\">topic</span><span class=\"w\"> </span><span class=\"n\">filter</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">PII</span><span class=\"w\"> </span><span class=\"n\">scrub</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">injection</span><span class=\"w\"> </span><span class=\"n\">detection</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Prompt</span><span class=\"w\"> </span><span class=\"n\">Construction</span><span class=\"p\">]</span><span class=\"w\">   </span><span class=\"p\">(</span><span class=\"n\">template</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"n\">RAG</span><span class=\"w\"> </span><span class=\"n\">context</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">LLM</span><span class=\"w\"> </span><span class=\"n\">Call</span><span class=\"p\">]</span><span class=\"w\">              </span><span class=\"p\">(</span><span class=\"n\">with</span><span class=\"w\"> </span><span class=\"n\">tool</span><span class=\"w\"> </span><span class=\"n\">definitions</span><span class=\"w\"> </span><span class=\"n\">attached</span><span class=\"p\">)</span>\n<span class=\"w\">        </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Tool</span><span class=\"w\"> </span><span class=\"n\">Execution</span><span class=\"w\"> </span><span class=\"n\">Loop</span><span class=\"p\">]</span><span class=\"w\">   </span><span class=\"p\">(</span><span class=\"n\">your</span><span class=\"w\"> </span><span class=\"n\">code</span><span class=\"w\"> </span><span class=\"n\">runs</span><span class=\"w\"> </span><span class=\"n\">tools</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">feeds</span><span class=\"w\"> </span><span class=\"n\">results</span><span class=\"w\"> </span><span class=\"n\">back</span><span class=\"p\">)</span>\n<span class=\"w\">        </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Structured</span><span class=\"w\"> </span><span class=\"n\">Output</span><span class=\"w\"> </span><span class=\"n\">Parsing</span><span class=\"p\">]</span><span class=\"w\">  </span><span class=\"p\">(</span><span class=\"n\">Pydantic</span><span class=\"w\"> </span><span class=\"n\">validation</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Output</span><span class=\"w\"> </span><span class=\"n\">Guardrails</span><span class=\"p\">]</span><span class=\"w\">     </span><span class=\"p\">(</span><span class=\"n\">factuality</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">safety</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">schema</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">Response</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>Key principle:</strong> the LLM is the reasoning engine \u2014 everything around it is engineering.\nThe LLM decides <em>what</em> to do. Your code decides <em>how</em> to do it safely and reliably.</span>\n<hr />\n<h3 id=\"the-4-patterns-this-notebook-covers\">The 4 patterns this notebook covers</h3>\n<table>\n<thead>\n<tr>\n<th>Pattern</th>\n<th>What it solves</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Tool Calling</strong></td>\n<td>How LLMs take action in the world</td>\n</tr>\n<tr>\n<td><strong>Structured Outputs</strong></td>\n<td>How you get reliable, parseable responses</td>\n</tr>\n<tr>\n<td><strong>Guardrails</strong></td>\n<td>How you keep the system safe and on-task</td>\n</tr>\n<tr>\n<td><strong>Evals</strong></td>\n<td>How you know it actually works</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\">\"Most AI engineering interviews test whether you can build <em>around</em> the LLM, not just\nprompt it. These 4 patterns are the core of that.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "f798fa046db06ce01baf7259b465b857",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-1-tool-calling-function-calling\">Pattern 1: Tool Calling / Function Calling</h2>\n<h3 id=\"what-it-is\">What it is</h3>\n<span class=\"paragraph\">The LLM decides <strong>when</strong> to call a function and <strong>with what arguments</strong> \u2014 but it never\nexecutes the function itself. Your code runs it, then feeds the result back to the LLM.</span>\n<h3 id=\"the-loop\">The loop</h3>\n<div class=\"language-gdscript codehilite\"><pre><span></span><code><span class=\"n\">LLM</span><span class=\"w\"> </span><span class=\"n\">sees</span><span class=\"w\"> </span><span class=\"k\">tool</span><span class=\"w\"> </span><span class=\"n\">definitions</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">decides</span><span class=\"w\"> </span><span class=\"n\">to</span><span class=\"w\"> </span><span class=\"n\">call</span><span class=\"w\"> </span><span class=\"n\">one</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"ow\">or</span><span class=\"w\"> </span><span class=\"n\">several</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">returns</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"n\">structured</span><span class=\"w\"> </span><span class=\"k\">tool</span><span class=\"w\"> </span><span class=\"n\">call</span><span class=\"w\"> </span><span class=\"n\">object</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"ow\">not</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">answer</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">your</span><span class=\"w\"> </span><span class=\"n\">code</span><span class=\"w\"> </span><span class=\"n\">dispatches</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">call</span><span class=\"w\"> </span><span class=\"ow\">and</span><span class=\"w\"> </span><span class=\"n\">executes</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">real</span><span class=\"w\"> </span><span class=\"n\">function</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">result</span><span class=\"w\"> </span><span class=\"k\">is</span><span class=\"w\"> </span><span class=\"n\">fed</span><span class=\"w\"> </span><span class=\"n\">back</span><span class=\"w\"> </span><span class=\"n\">into</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">conversation</span>\n<span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">LLM</span><span class=\"w\"> </span><span class=\"n\">reasons</span><span class=\"w\"> </span><span class=\"n\">over</span><span class=\"w\"> </span><span class=\"n\">result</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">either</span><span class=\"w\"> </span><span class=\"n\">calls</span><span class=\"w\"> </span><span class=\"n\">more</span><span class=\"w\"> </span><span class=\"n\">tools</span><span class=\"w\"> </span><span class=\"ow\">or</span><span class=\"w\"> </span><span class=\"n\">gives</span><span class=\"w\"> </span><span class=\"n\">final</span><span class=\"w\"> </span><span class=\"n\">answer</span>\n</code></pre></div>\n<h3 id=\"key-architectural-decisions\">Key architectural decisions</h3>\n<table>\n<thead>\n<tr>\n<th>Decision</th>\n<th>Single-shot</th>\n<th>Agentic / Multi-step</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Loop runs</td>\n<td>Once</td>\n<td>Until LLM signals done</td>\n</tr>\n<tr>\n<td>Control</td>\n<td>Caller</td>\n<td>LLM (with guardrails)</td>\n</tr>\n<tr>\n<td>Cost</td>\n<td>Predictable</td>\n<td>Variable \u2014 budget matters</td>\n</tr>\n<tr>\n<td>Use case</td>\n<td>Simple lookup</td>\n<td>Research, planning, coding</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"react-pattern\">ReAct Pattern</h3>\n<span class=\"paragraph\"><strong>Thought \u2192 Action \u2192 Observation \u2192 repeat</strong></span>\n<span class=\"paragraph\">The LLM explicitly reasons (\"I need to look up X\"), acts (calls the tool),\nobserves the result, and decides next step. This makes reasoning auditable.</span>\n<h3 id=\"parallel-vs-sequential-tool-calls\">Parallel vs sequential tool calls</h3>\n<ul>\n<li><strong>Parallel:</strong> independent lookups (get weather in 3 cities) \u2014 faster, no ordering dependency</li>\n<li><strong>Sequential:</strong> each call depends on the previous result (search \u2192 summarize \u2192 store) \u2014 order matters</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "2bc8f34acb8b3a40a0908ef4c67452ef",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "d6fe98411f039186f484e002c2997de5",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'result' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "93fea5875b3b1aad3a79699385d025ba",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-tool-calling-in-practice\">My Projects \u2014 Tool Calling in Practice</h3>\n<span class=\"paragraph\"><strong>Daily AI Research Briefing Agent</strong>\nUses tool calling to search arXiv, query the Reddit API, and retrieve from ChromaDB.\nThe LLM orchestrates 4 different data source tools, deciding which sources to query\nbased on the research topic. Key design decision: all tool calls are <strong>idempotent</strong>\nso retries are safe. Each tool has <strong>timeout + fallback logic</strong> \u2014 if arXiv is slow,\nthe agent continues with the other sources.</span>\n<span class=\"paragraph\"><strong>Canopy (Job Search Agent)</strong>\nLangGraph pipeline where tool calls drive the workflow: scraping \u2192 scoring \u2192 Slack\nnotification. Each node in the graph is essentially a tool-call decision point.\nThe LLM decides whether a posting is worth scoring before spending tokens on it.</span>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"In my research agent, the LLM orchestrates 4 different data source tools. The key\ndesign decisions were: (1) making tool calls idempotent so retries are safe,\n(2) implementing timeout + fallback logic for each tool, and (3) capping the loop\nat 10 iterations to bound cost. The LLM does the reasoning \u2014 I do the engineering\naround it.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "ee92ba58d6d422bd22bf3913f86a2a39",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-2-structured-outputs\">Pattern 2: Structured Outputs</h2>\n<h3 id=\"the-problem\">The problem</h3>\n<span class=\"paragraph\">LLMs return free text. Your downstream systems need typed, structured data.\nBridging that gap is one of the most common AI engineering tasks.</span>\n<h3 id=\"3-approaches-ranked-by-reliability\">3 approaches, ranked by reliability</h3>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>Reliability</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Prompt-based</strong> \u2014 \"Return JSON with these fields\"</td>\n<td>~90%</td>\n<td>Prototyping only</td>\n</tr>\n<tr>\n<td><strong>Schema-constrained</strong> \u2014 Pydantic + retry</td>\n<td>~99%</td>\n<td>Production standard</td>\n</tr>\n<tr>\n<td><strong>Native structured outputs</strong> \u2014 API-enforced JSON schema</td>\n<td>~100%</td>\n<td>Mission-critical</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"why-prompt-based-fails\">Why prompt-based fails</h3>\n<span class=\"paragraph\">LLMs are trained to be helpful, not to be JSON validators. Under pressure (long prompts,\ncomplex schemas, edge cases) they'll add prose, change field names, or omit required fields.\n1-in-10 failures is catastrophic in production pipelines.</span>\n<h3 id=\"schema-constrained-approach-the-production-standard\">Schema-constrained approach (the production standard)</h3>\n<ol>\n<li>Define a Pydantic model as your <strong>contract</strong></li>\n<li>Ask the LLM to return JSON matching that schema</li>\n<li>Validate with <code>Model.model_validate_json(response)</code></li>\n<li>On <code>ValidationError</code>, retry with the error message appended \u2014 the LLM usually self-corrects</li>\n</ol>\n<h3 id=\"native-structured-outputs\">Native structured outputs</h3>\n<span class=\"paragraph\">Anthropic and OpenAI both support passing a JSON schema directly to the API.\nThe model's output is constrained at the token level \u2014 it's <strong>mathematically impossible</strong>\nto return invalid JSON. Use this for schemas where failures are unacceptable.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "276f4dbf644ab16ea7a516eca71863f9",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'result' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "962ba0147985146e1eb5ccf8b2c5f04b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-structured-outputs-in-practice\">My Projects \u2014 Structured Outputs in Practice</h3>\n<span class=\"paragraph\"><strong>Canopy (Job Search Agent)</strong>\nUses Pydantic-validated structured outputs to parse job postings into typed <code>JobPosting</code>\nobjects for scoring and comparison. Pydantic validation catches malformed LLM output\nbefore it enters the scoring pipeline. Discovered that ~8% of raw LLM outputs had\nfield name variations (\"fit\" instead of \"fit_score\") \u2014 schema validation catches all of these.</span>\n<span class=\"paragraph\"><strong>Daily AI Research Briefing Agent</strong>\nStructures research summaries into typed objects with <code>title</code>, <code>key_findings</code>,\n<code>relevance_score</code>, and <code>source_urls</code>. The downstream Slack formatting pipeline depends\non a consistent schema \u2014 without it, the whole delivery pipeline would break.</span>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"I use Pydantic models as contracts between the LLM and downstream systems.\nThe LLM's output is never trusted directly \u2014 it's always validated and typed before\nentering the pipeline. I think of it like an API boundary: the LLM is an external\nservice that might return anything, and Pydantic is the validation layer that enforces\nthe contract.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "fca94619fae8527167bf0843bb0b91c2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-3-guardrails\">Pattern 3: Guardrails</h2>\n<span class=\"paragraph\">Guardrails are the engineering that makes probabilistic LLM outputs deterministically safe.\nWithout them, a 1-in-100 failure rate becomes a production incident.</span>\n<h3 id=\"input-guardrails-validate-what-goes-into-the-llm\">Input guardrails \u2014 validate what goes INTO the LLM</h3>\n<table>\n<thead>\n<tr>\n<th>Guardrail</th>\n<th>What it catches</th>\n<th>Why it matters</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Topic boundaries</td>\n<td>Off-topic queries</td>\n<td>Cost control, focus</td>\n</tr>\n<tr>\n<td>PII detection</td>\n<td>Names, emails, SSNs</td>\n<td>Privacy compliance</td>\n</tr>\n<tr>\n<td>Prompt injection</td>\n<td>\"Ignore previous instructions...\"</td>\n<td>Security</td>\n</tr>\n<tr>\n<td>Length / cost limits</td>\n<td>50k token inputs</td>\n<td>Latency + $ control</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"output-guardrails-validate-what-comes-out\">Output guardrails \u2014 validate what comes OUT</h3>\n<table>\n<thead>\n<tr>\n<th>Guardrail</th>\n<th>What it catches</th>\n<th>Why it matters</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Schema validation</td>\n<td>Missing/wrong fields</td>\n<td>Downstream reliability</td>\n</tr>\n<tr>\n<td>Factuality check</td>\n<td>Output contradicts retrieved context</td>\n<td>RAG correctness</td>\n</tr>\n<tr>\n<td>Toxicity / safety</td>\n<td>Harmful content</td>\n<td>Brand / legal risk</td>\n</tr>\n<tr>\n<td>Hallucination detection</td>\n<td>Citations that don't exist</td>\n<td>Trust</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"system-guardrails-operational-safety\">System guardrails \u2014 operational safety</h3>\n<table>\n<thead>\n<tr>\n<th>Guardrail</th>\n<th>What it does</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Rate limiting</td>\n<td>Caps requests per user/minute</td>\n</tr>\n<tr>\n<td>Cost caps</td>\n<td>Stops runaway spending</td>\n</tr>\n<tr>\n<td>Circuit breaker</td>\n<td>Falls back gracefully when LLM is down</td>\n</tr>\n<tr>\n<td>Timeout</td>\n<td>Prevents hanging on slow model responses</td>\n</tr>\n<tr>\n<td>Human escalation</td>\n<td>Routes ambiguous cases to a person</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "1b01033e303bef399b244a35e70b7579",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u2550\u2550\u2550 Test 1: Valid AI query \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  [Input] length_check: PASS \u2014 Length OK: 58 chars\n  [Input] prompt_injection_check: PASS \u2014 No injection detected\n  [Input] topic_check: PASS \u2014 Topic OK: matched ['transformer']\n  [Output] output_schema_check: PASS \u2014 Schema OK: all 2 fields present\nResponse: {\"summary\": \"Transformers are still king.\", \"source_count\": 5}\n\n\u2550\u2550\u2550 Test 2: Prompt injection attempt \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  [Input] length_check: PASS \u2014 Length OK: 63 chars\n  [Input] prompt_injection_check: PASS \u2014 No injection detected\n  [Input] topic_check: FAIL \u2014 Off-topic: no match for ['AI', 'ML']\nSafe default: I can only help with AI and machine learning topics.\n\n\u2550\u2550\u2550 Test 3: Off-topic query \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  [Input] length_check: PASS \u2014 Length OK: 42 chars\n  [Input] prompt_injection_check: PASS \u2014 No injection detected\n  [Input] topic_check: FAIL \u2014 Off-topic: no match for ['AI', 'machine learning', 'LLM']\nSafe default: I can only help with AI and machine learning topics.\n\n\u2550\u2550\u2550 Test 4: Malformed LLM output \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  [Input] length_check: PASS \u2014 Length OK: 34 chars\n  [Input] prompt_injection_check: PASS \u2014 No injection detected\n  [Input] topic_check: PASS \u2014 Topic OK: matched ['attention']\n  [Output] output_schema_check: FAIL \u2014 Output missing required fields: ['summary', 'source_count']\nSafe default: {\"error\": \"Incomplete response. Please try again.\"}\n\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "emfo",
+      "code_hash": "a83603674fd7acb743b53c8e10b9be41",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-guardrails-in-practice\">My Projects \u2014 Guardrails in Practice</h3>\n<span class=\"paragraph\"><strong>Daily AI Research Briefing Agent</strong></span>\n<ul>\n<li>Input guardrails filter research queries to ML/AI topics only \u2014 prevents the\n  agent from spending tokens on off-topic content</li>\n<li>Output guardrails verify that summaries cite real arXiv paper IDs (hallucination\n  check via regex match against actual retrieved IDs)</li>\n<li>Cost guardrails cap daily API spend via a persistent counter in Redis</li>\n</ul>\n<span class=\"paragraph\"><strong>Canopy (Job Search Agent)</strong></span>\n<ul>\n<li>Guardrails ensure job scoring stays within the defined rubric \u2014 the LLM can't\n  invent scoring criteria outside the Pydantic-defined schema</li>\n<li>Deduplication guardrail prevents sending the same job posting to Slack twice\n  (checks against a seen-postings set before firing the notification)</li>\n</ul>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"Every LLM call in my systems goes through a guardrail pipeline. The most\nimportant one is output validation \u2014 I never pass raw LLM output to downstream\nsystems without schema validation and a factuality check against retrieved context.\nI think of guardrails as the type system for LLM outputs: they're what makes\nprobabilistic outputs deterministically safe.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "43b6f5bdfe9d42e3dd3ca8283d47de5c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-4-evals\">Pattern 4: Evals</h2>\n<blockquote>\n<span class=\"paragraph\">\"Evals are the hardest part of AI engineering and what separates hobbyists from\nproduction engineers.\"</span>\n</blockquote>\n<span class=\"paragraph\">Without evals, you don't know if your system works. With evals, you have a\nfeedback loop that lets you iterate confidently.</span>\n<h3 id=\"eval-taxonomy\">Eval taxonomy</h3>\n<table>\n<thead>\n<tr>\n<th>Type</th>\n<th>What it is</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Unit evals</strong></td>\n<td>Known input \u2192 expected output</td>\n<td>Core functionality, deterministic cases</td>\n</tr>\n<tr>\n<td><strong>Comparison evals</strong></td>\n<td>Model A vs Model B</td>\n<td>Prompt changes, model upgrades</td>\n</tr>\n<tr>\n<td><strong>Regression evals</strong></td>\n<td>Did my change break anything?</td>\n<td>Every prompt change, in CI/CD</td>\n</tr>\n<tr>\n<td><strong>Human evals</strong></td>\n<td>A human rates the output</td>\n<td>Gold standard, expensive, use sparingly</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"what-to-eval\">What to eval</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>How to measure</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Correctness</td>\n<td>Exact match, contains-check, or LLM-as-judge</td>\n</tr>\n<tr>\n<td>Relevance</td>\n<td>Does it answer the actual question?</td>\n</tr>\n<tr>\n<td>Format compliance</td>\n<td>Schema validation, regex</td>\n</tr>\n<tr>\n<td>Latency</td>\n<td>Wall-clock time per call</td>\n</tr>\n<tr>\n<td>Cost</td>\n<td>Token count \u00d7 price</td>\n</tr>\n<tr>\n<td>Safety</td>\n<td>Classifier on outputs</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"eval-driven-development\">Eval-driven development</h3>\n<span class=\"paragraph\">Write the eval <strong>first</strong>, then iterate on the prompt. Like TDD but for LLMs.</span>\n<ol>\n<li>Define test cases from real examples (golden set)</li>\n<li>Write the eval runner</li>\n<li>Establish a baseline score</li>\n<li>Change the prompt / model</li>\n<li>Run evals \u2014 only ship if score improves or holds</li>\n</ol>\n<blockquote>\n<span class=\"paragraph\">\"I treat prompts like code. Every change goes through an eval suite before deployment.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "cc6129a96147ccb90d0d61e13920fa9d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u2550\u2550 Suite 1: Contains scorer (production regression evals) \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\u2550\u2550 Eval Results \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  [PASS] score=1.00 latency=71ms\n         Input:    What is the capital of France?\n         Expected: Paris\n         Actual:   The capital of France is Paris.\n\n  [PASS] score=1.00 latency=107ms\n         Input:    Summarize the transformer architecture\n         Expected: self-attention\n         Actual:   Transformers use self-attention to process sequences in para\n\n  [PASS] score=1.00 latency=186ms\n         Input:    What is RAG?\n         Expected: retrieval\n         Actual:   RAG (Retrieval-Augmented Generation) combines a retrieval sy\n\n  [PASS] score=1.00 latency=116ms\n         Input:    Explain tool calling\n         Expected: LLM\n         Actual:   Tool calling lets the LLM decide when to invoke external fun\n\n\u2550\u2550 Aggregate Metrics \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  Pass rate:      100% (4/4)\n  Avg score:      1.000\n  Avg latency:    120ms\n  P95 latency:    186ms\n\n\u2550\u2550 Suite 2: LLM-as-judge scorer (fuzzy quality eval) \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n  LLM-as-judge pass rate: 50%\n  LLM-as-judge avg score: 0.711\n\nIn production: run contains_scorer in CI/CD (fast, deterministic).\nRun LLM-as-judge on sampled outputs weekly (expensive, nuanced).\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "iLit",
+      "code_hash": "7a7a9d420be056a0352cb00036d26cb2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-evals-in-practice\">My Projects \u2014 Evals in Practice</h3>\n<span class=\"paragraph\"><strong>Daily AI Research Briefing Agent</strong></span>\n<ul>\n<li>Unit evals check that summaries contain real paper references (arXiv ID regex match)</li>\n<li>Format evals verify token budget compliance and required schema fields</li>\n<li>Regression evals run on every prompt change via GitHub Actions \u2014 a failing eval\n  blocks the merge</li>\n<li>LLM-as-judge evals run weekly on a 10% sample to track summary quality over time</li>\n</ul>\n<span class=\"paragraph\"><strong>Canopy (Job Search Agent)</strong></span>\n<ul>\n<li>Consistency evals verify that the same job description gets similar scores across\n  runs (variance &lt; 0.1 on fit_score) \u2014 important for reproducibility</li>\n<li>Comparison evals tested 3 different scoring prompt versions \u2014 picked the one with\n  the highest correlation to actual application success rate</li>\n</ul>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"I treat prompts like code \u2014 every change goes through an eval suite before\ndeployment. My briefing agent runs regression evals in CI/CD, so I know\nimmediately if a prompt change degrades quality. The eval harness took a day\nto build; it's saved me from shipping bad prompts dozens of times.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "371915b755ce0ab5b86f768dd192a405",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"putting-it-all-together\">Putting It All Together</h2>\n<span class=\"paragraph\">A production LLM application using all 4 patterns:</span>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"err\">\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                        </span><span class=\"n\">RUNTIME</span><span class=\"w\"> </span><span class=\"n\">PATH</span><span class=\"w\">                                 </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                                                                     </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">  </span><span class=\"p\">[</span><span class=\"n\">User</span><span class=\"w\"> </span><span class=\"n\">Query</span><span class=\"p\">]</span><span class=\"w\">                                                       </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Input</span><span class=\"w\"> </span><span class=\"n\">Guardrails</span><span class=\"p\">]</span><span class=\"w\">      </span><span class=\"n\">topic</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">PII</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">injection</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">length</span><span class=\"w\">        </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Prompt</span><span class=\"w\"> </span><span class=\"n\">Construction</span><span class=\"p\">]</span><span class=\"w\">   </span><span class=\"n\">template</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"n\">RAG</span><span class=\"w\"> </span><span class=\"n\">context</span><span class=\"w\">               </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">LLM</span><span class=\"w\"> </span><span class=\"n\">Call</span><span class=\"p\">]</span><span class=\"w\">              </span><span class=\"n\">with</span><span class=\"w\"> </span><span class=\"n\">tool</span><span class=\"w\"> </span><span class=\"n\">definitions</span><span class=\"w\"> </span><span class=\"n\">attached</span><span class=\"w\">        </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">          </span><span class=\"err\">\u2195</span><span class=\"w\">  </span><span class=\"p\">[</span><span class=\"n\">Tool</span><span class=\"w\"> </span><span class=\"n\">Execution</span><span class=\"w\"> </span><span class=\"n\">Loop</span><span class=\"p\">]</span><span class=\"w\">   </span><span class=\"n\">search</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">retrieve</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">compute</span><span class=\"w\">       </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">          </span><span class=\"err\">\u2195</span><span class=\"w\">  </span><span class=\"p\">[</span><span class=\"n\">Structured</span><span class=\"w\"> </span><span class=\"n\">Output</span><span class=\"w\"> </span><span class=\"n\">Parsing</span><span class=\"p\">]</span><span class=\"w\">  </span><span class=\"n\">Pydantic</span><span class=\"w\"> </span><span class=\"n\">validation</span><span class=\"w\">        </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Output</span><span class=\"w\"> </span><span class=\"n\">Guardrails</span><span class=\"p\">]</span><span class=\"w\">     </span><span class=\"n\">factuality</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">safety</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">schema</span><span class=\"w\">           </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Response</span><span class=\"p\">]</span><span class=\"w\">                                                   </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                                                                     </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                       </span><span class=\"n\">OFFLINE</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"n\">CI</span><span class=\"w\"> </span><span class=\"n\">PATH</span><span class=\"w\">                             </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                                                                     </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">  </span><span class=\"p\">[</span><span class=\"n\">Eval</span><span class=\"w\"> </span><span class=\"n\">Pipeline</span><span class=\"p\">]</span><span class=\"w\">                                                    </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Unit</span><span class=\"w\"> </span><span class=\"n\">Evals</span><span class=\"p\">]</span><span class=\"w\">        </span><span class=\"n\">known</span><span class=\"w\"> </span><span class=\"n\">inputs</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">expected</span><span class=\"w\"> </span><span class=\"n\">outputs</span><span class=\"w\">          </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Regression</span><span class=\"w\"> </span><span class=\"n\">Evals</span><span class=\"p\">]</span><span class=\"w\">  </span><span class=\"n\">did</span><span class=\"w\"> </span><span class=\"n\">prompt</span><span class=\"w\"> </span><span class=\"n\">change</span><span class=\"w\"> </span><span class=\"k\">break</span><span class=\"w\"> </span><span class=\"n\">anything</span><span class=\"o\">?</span><span class=\"w\">        </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">      </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Human</span><span class=\"w\"> </span><span class=\"n\">Evals</span><span class=\"p\">]</span><span class=\"w\">       </span><span class=\"n\">sampled</span><span class=\"w\"> </span><span class=\"n\">outputs</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">rated</span><span class=\"w\"> </span><span class=\"n\">weekly</span><span class=\"w\">            </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                                                                     </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                         </span><span class=\"n\">MONITORING</span><span class=\"w\">                                  </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">                                                                     </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2502</span><span class=\"w\">  </span><span class=\"n\">Latency</span><span class=\"w\"> </span><span class=\"err\">\u00b7</span><span class=\"w\"> </span><span class=\"n\">Cost</span><span class=\"w\"> </span><span class=\"err\">\u00b7</span><span class=\"w\"> </span><span class=\"n\">Error</span><span class=\"w\"> </span><span class=\"n\">Rate</span><span class=\"w\"> </span><span class=\"err\">\u00b7</span><span class=\"w\"> </span><span class=\"n\">Output</span><span class=\"w\"> </span><span class=\"n\">Drift</span><span class=\"w\"> </span><span class=\"err\">\u00b7</span><span class=\"w\"> </span><span class=\"n\">Guardrail</span><span class=\"w\"> </span><span class=\"n\">Hit</span><span class=\"w\"> </span><span class=\"n\">Rate</span><span class=\"w\">    </span><span class=\"err\">\u2502</span>\n<span class=\"err\">\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\">\"This is the architecture I'd draw on a whiteboard. Every box is a pattern from\nthis notebook. The LLM is one box out of many \u2014 the engineering around it is\nwhat makes it production-grade.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"backtesting-engine-connection\">Backtesting engine connection</h3>\n<span class=\"paragraph\">The same 4 patterns map directly to my backtesting engine:</span>\n<table>\n<thead>\n<tr>\n<th>AI Pattern</th>\n<th>Backtesting Analogue</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Tool calling loop</td>\n<td>Event-driven execution loop \u2014 each event triggers a handler</td>\n</tr>\n<tr>\n<td>Structured outputs</td>\n<td>Typed data contracts between strategy, broker, and portfolio components</td>\n</tr>\n<tr>\n<td>Guardrails</td>\n<td>Risk limits, position size caps, validation at every component boundary</td>\n</tr>\n<tr>\n<td>Evals</td>\n<td>Backtesting itself IS an eval framework \u2014 known market data, measurable outcomes</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\">\"I can talk about these patterns from 3 different domains: LLM systems, job search\nagents, and quantitative finance. The patterns are the same \u2014 the domains are different.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "21571e41220fa35142091c54804d66af",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<span class=\"paragraph\"><strong>What is tool calling?</strong>\n\u2192 LLM decides when/what to call; your code executes. The LLM never runs code itself.</span>\n<span class=\"paragraph\"><strong>What's the ReAct pattern?</strong>\n\u2192 Thought \u2192 Action \u2192 Observation loop. LLM reasons, acts, observes, repeats.</span>\n<span class=\"paragraph\"><strong>Why use structured outputs?</strong>\n\u2192 LLMs return free text. Production systems need typed, validated data.</span>\n<span class=\"paragraph\"><strong>Name 3 types of guardrails.</strong>\n\u2192 Input (topic/PII/injection), output (schema/factuality), system (cost/timeout/circuit breaker).</span>\n<span class=\"paragraph\"><strong>How do you eval an LLM system?</strong>\n\u2192 Unit evals for correctness, regression evals in CI/CD, LLM-as-judge for fuzzy quality.</span>\n<span class=\"paragraph\"><strong>What's the hardest part of AI engineering?</strong>\n\u2192 Evals. Knowing whether your system actually works.</span>\n<span class=\"paragraph\"><strong>Prompt-based vs schema-constrained structured outputs?</strong>\n\u2192 Prompt-based is fragile (~90%). Schema-constrained with Pydantic is reliable (~99%).</span>\n<span class=\"paragraph\"><strong>How do you detect hallucinations?</strong>\n\u2192 Compare output against retrieved context. Verify cited sources exist.</span>\n<span class=\"paragraph\"><strong>What's eval-driven development?</strong>\n\u2192 Write evals first, then iterate on prompts. Like TDD for LLMs.</span>\n<span class=\"paragraph\"><strong>Why are guardrails important?</strong>\n\u2192 LLMs are probabilistic. Without guardrails, 1-in-100 failures become production incidents.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "05155eadda992efc93d554f81219662b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<span class=\"paragraph\"><strong>\"Describe the architecture of an LLM application you've built.\"</strong>\nWalk through the briefing agent: data ingestion (arXiv, Reddit) \u2192 RAG retrieval\n(ChromaDB) \u2192 LLM reasoning with tool calls \u2192 structured output \u2192 Slack delivery.\nEvery layer maps to a pattern in this notebook.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"How do you ensure reliability?\"</strong>\nStructured outputs with Pydantic, guardrail chain on inputs and outputs, retry with\nexponential backoff, fallback responses, eval suite in CI/CD. Reliability is layered \u2014\nno single mechanism is sufficient.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"How do you handle prompt changes?\"</strong>\nVersion-control prompts (treat them like code), run regression evals, compare metrics\nbefore/after, gradual rollout. A prompt change that drops pass rate by &gt;5% doesn't ship.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"What's the biggest lesson you've learned building with LLMs?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"The LLM is maybe 20% of the system. The other 80% is the engineering around it \u2014\nguardrails, evals, structured parsing, error handling, monitoring. That's what makes\nit production-grade. Anyone can prompt an LLM. Not everyone can build a system that\nruns reliably at 3am without a human watching it.\"</span>\n</blockquote>\n<hr />\n<span class=\"paragraph\"><strong>\"How does this connect to your other work?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"My backtesting engine uses the same architectural patterns: event-driven execution\nloop (like tool calling), typed data contracts between components (like structured\noutputs), validation at every boundary (like guardrails), and backtesting itself IS\nan eval framework \u2014 known historical data, measurable outcomes. The patterns\ntransfer across domains.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

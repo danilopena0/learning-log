@@ -491,13 +491,13 @@ def structured_outputs_code(json, re, dataclass, Optional):
             return None
 
         # Good path
-        result = parse_job_match_with_retry(mock_llm_good_json)
-        if result:
-            print(f"Parsed: {result.company} | score={result.fit_score} | skills={result.skills_matched}")
+        job_result = parse_job_match_with_retry(mock_llm_good_json)
+        if job_result:
+            print(f"Parsed: {job_result.company} | score={job_result.fit_score} | skills={job_result.skills_matched}")
 
         # Missing field path — Pydantic catches it
-        result = parse_job_match_with_retry(mock_llm_missing_field)
-        print(f"Missing field result: {result}")  # None after retries
+        job_result = parse_job_match_with_retry(mock_llm_missing_field)
+        print(f"Missing field result: {job_result}")  # None after retries
         print(f"Reliability: ~99%. Schema enforced at parse time.\n")
 
     # ── Approach 3: Native structured outputs (API-enforced) ─────────────────────
