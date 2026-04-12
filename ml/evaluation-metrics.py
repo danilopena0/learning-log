@@ -821,27 +821,811 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md("""
+    ## Classification Metrics — Full Comparison (Pros, Cons & Scale)
+
+    | Metric | Formula | Pros ✓ | Cons ✗ | Scalable? |
+    |--------|---------|--------|--------|-----------|
+    | **Accuracy** | (TP+TN)/N | Simple, universally understood | Misleads on imbalanced data — 99% acc can mean 0% recall | O(n) ✓ |
+    | **Precision** | TP/(TP+FP) | Direct: "of all flags, how many are real?" | Threshold-dependent; ignores FN entirely | O(n) ✓ |
+    | **Recall / TPR** | TP/(TP+FN) | Direct: "of all positives, how many caught?" | Threshold-dependent; ignores FP entirely | O(n) ✓ |
+    | **F1** | 2PR/(P+R) | Single number balancing P and R; harmonic punishes extremes | Assumes P and R equally important — rarely true in practice | O(n) ✓ |
+    | **F-beta** | (1+β²)PR/(β²P+R) | Tune β to reflect actual cost asymmetry (F2 = recall-heavy, F0.5 = precision-heavy) | β requires domain knowledge to set | O(n) ✓ |
+    | **AUC-ROC** | Area under TPR/FPR curve | Threshold-free; great for model comparison; probabilistic interpretation | Inflated on imbalanced data — huge TN pool artificially deflates FPR | O(n log n) ✓ |
+    | **AUC-PR** | Area under Precision/Recall curve | Correct for rare events; does not use TN at all | Baseline = prevalence (varies per dataset); harder to explain | O(n log n) ✓ |
+    | **Log-loss** | −mean(y log ŷ + (1−y) log(1−ŷ)) | Captures calibration quality; the actual training objective | Sensitive to overconfident wrong predictions; unbounded above | O(n) ✓ |
+    | **Brier Score** | mean((ŷ−y)²) | Measures calibration; bounded [0,1]; decomposable | Dominated by majority class in imbalanced setting | O(n) ✓ |
+    | **MCC** | (TP·TN−FP·FN)/√(…) | Symmetric; works for multi-class; best single metric for imbalanced binary | Less intuitive to explain to stakeholders | O(n) ✓ |
+    | **Precision@K** | relevant in top-K / K | Actionable when review budget is fixed (e.g., "we can review 100/day") | Rank-insensitive within top K | O(n log n) ✓ |
+
+    **Scalability at production scale:**
+    - O(n) metrics (accuracy, precision, F1, log-loss) → trivially parallelizable: just shard and aggregate counts
+    - AUC metrics (O(n log n)) → sklearn handles millions of rows; at billions, use random sampling (1M sample gives ~0.001 error)
+    - MCC → same cost as F1 once you have TP/FP/FN/TN counts
+    - **When to escalate:** AUC-ROC → AUC-PR when positive class < 10%. F1 → MCC for extreme imbalance or multi-class.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## Regression Metrics
+
+    > **"Classification is about being right. Regression is about being *how* wrong — and in what direction."**
+
+    Every regression metric encodes a different answer to: *"Which errors do I care about most?"*
+
+    | Metric | Formula | Unit | Outlier Sensitivity | Minimize by predicting |
+    |--------|---------|------|--------------------|-----------------------|
+    | **MAE** | mean(\|y − ŷ\|) | Same as y | Low (linear) | Conditional median |
+    | **MSE** | mean((y − ŷ)²) | y² | High (quadratic) | Conditional mean |
+    | **RMSE** | √MSE | Same as y | High (quadratic) | Conditional mean |
+    | **MAPE** | mean(\|y−ŷ\|/\|y\|)×100 | % | Low (relative) | Conditional median (approximately) |
+    | **SMAPE** | mean(2\|y−ŷ\|/(|y|+|ŷ|))×100 | % | Low (symmetric) | No clean closed-form |
+    | **R²** | 1 − SS_res/SS_tot | Dimensionless | High (squared) | Same as MSE |
+    | **Huber(δ)** | MSE if \|e\|≤δ, else MAE shifted | Same as y | Tunable via δ | Huber M-estimator |
+
+    **Key intuitions:**
+    - **RMSE > MAE** always (Jensen's inequality). A large gap → heavy-tailed errors → outliers present.
+    - **R² = 0**: model does no better than predicting the mean every time.
+    - **R² < 0**: your model is actively worse than "always predict the mean" — this is possible and a red flag.
+    - **MAPE breaks** when y = 0 (division by zero). Default to MAE or SMAPE for sparse targets.
+    - **Huber δ** controls the boundary: small δ → behaves like MAE, large δ → behaves like MSE.
+    """)
+    return
+
+
+@app.cell
+def regression_metrics_viz():
+    import numpy as _np
+    import matplotlib as _matplotlib
+    _matplotlib.use("Agg")
+    import matplotlib.pyplot as _plt
+
+    _rng = _np.random.default_rng(42)
+    _n = 100
+    _X = _np.linspace(0, 10, _n)
+    _y_true = 2.5 * _X + 5 + _rng.normal(0, 3, _n)
+    _outlier_idx = [10, 30, 55, 78]
+    _y_true[_outlier_idx] += _rng.choice([-1, 1], size=len(_outlier_idx)) * 22
+
+    def _ols_predict(x, y):
+        _c = _np.polyfit(x, y, 1)
+        return _np.polyval(_c, x)
+
+    _y_pred = _ols_predict(_X, _y_true)
+    _errors = _y_true - _y_pred
+
+    _mae  = float(_np.mean(_np.abs(_errors)))
+    _rmse = float(_np.sqrt(_np.mean(_errors ** 2)))
+    _ss_res = float(_np.sum(_errors ** 2))
+    _ss_tot = float(_np.sum((_y_true - _y_true.mean()) ** 2))
+    _r2   = float(1 - _ss_res / _ss_tot)
+
+    # Huber penalty
+    _e_range = _np.linspace(-15, 15, 400)
+    _delta = 4.0
+    _huber_pen = _np.where(
+        _np.abs(_e_range) <= _delta,
+        0.5 * _e_range ** 2,
+        _delta * (_np.abs(_e_range) - 0.5 * _delta),
+    )
+
+    _fig, _axes = _plt.subplots(1, 3, figsize=(16, 5))
+
+    # — Left: scatter with residuals highlighted —
+    _ax1 = _axes[0]
+    _mask_out = _np.zeros(_n, dtype=bool)
+    _mask_out[_outlier_idx] = True
+    _ax1.scatter(_X[~_mask_out], _y_true[~_mask_out], color="#3498DB", alpha=0.6, s=28, label="Normal points")
+    _ax1.scatter(_X[_mask_out],  _y_true[_mask_out],  color="#E74C3C", s=90,  zorder=5, label="Outliers", marker="*")
+    _ax1.plot(_X, _y_pred, color="#E67E22", lw=2.5, label="OLS fit")
+    for _i in _outlier_idx:
+        _ax1.plot([_X[_i], _X[_i]], [_y_pred[_i], _y_true[_i]], color="#E74C3C", lw=1.5, linestyle="--", alpha=0.7)
+    _ax1.set_title(f"Data with Outliers\nMAE={_mae:.1f}  RMSE={_rmse:.1f}  R²={_r2:.3f}",
+                  fontsize=11, fontweight="bold")
+    _ax1.set_xlabel("X"); _ax1.set_ylabel("y")
+    _ax1.legend(fontsize=9); _ax1.grid(True, alpha=0.3)
+
+    # — Center: penalty curves —
+    _ax2 = _axes[1]
+    _ax2.plot(_e_range, _np.abs(_e_range),          color="#3498DB", lw=2.5, label="MAE  |e|")
+    _ax2.plot(_e_range, _e_range ** 2 / 8,          color="#E74C3C", lw=2.5, label="MSE  e²/8 (scaled)")
+    _ax2.plot(_e_range, _huber_pen / 4,              color="#27AE60", lw=2.5, linestyle="--", label=f"Huber (δ={_delta}) /4")
+    _ax2.annotate("MSE explodes\nfor outliers",
+                 xy=(12, 18), xytext=(5, 14), fontsize=8, color="#E74C3C",
+                 arrowprops=dict(arrowstyle="->", color="#E74C3C"))
+    _ax2.set_xlim(-15, 15); _ax2.set_ylim(0, 20)
+    _ax2.set_xlabel("Error  (y − ŷ)", fontsize=11); _ax2.set_ylabel("Penalty", fontsize=11)
+    _ax2.set_title("Penalty Curves\nHuber = best of both worlds", fontsize=11, fontweight="bold")
+    _ax2.legend(fontsize=9); _ax2.grid(True, alpha=0.3)
+
+    # — Right: residual histogram — mean vs median gap reveals outlier influence —
+    _ax3 = _axes[2]
+    _ax3.hist(_errors, bins=22, color="#9B59B6", alpha=0.75, edgecolor="white")
+    _ax3.axvline(0, color="k", lw=1.5, linestyle="--")
+    _ax3.axvline(float(_errors.mean()),   color="#E74C3C", lw=2.2, label=f"Mean  = {_errors.mean():.1f}  ← MSE minimizer")
+    _ax3.axvline(float(_np.median(_errors)), color="#3498DB", lw=2.2, label=f"Median = {_np.median(_errors):.1f}  ← MAE minimizer")
+    _ax3.set_xlabel("Residual", fontsize=11); _ax3.set_ylabel("Count", fontsize=11)
+    _ax3.set_title("Residual Distribution\nGap between mean and median = outlier influence",
+                  fontsize=11, fontweight="bold")
+    _ax3.legend(fontsize=9); _ax3.grid(True, alpha=0.3)
+
+    _fig.suptitle("Regression Metrics: How Outliers Shift MAE vs MSE vs Huber",
+                 fontsize=13, fontweight="bold")
+    _fig.tight_layout()
+    return _fig
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ### Regression Metrics — Pros, Cons & Scalability
+
+    | Metric | Pros ✓ | Cons ✗ | Scalable? | Interview tip |
+    |--------|--------|--------|-----------|---------------|
+    | **MAE** | Robust to outliers; interpretable in original units | Not differentiable at 0 (gradient issues); doesn't penalize catastrophic errors | O(n) ✓ | "Use MAE when outliers are real signal, not noise — e.g., demand spikes" |
+    | **MSE** | Differentiable everywhere; standard training loss; penalizes large errors heavily | Unit is y² (unintuitive); one outlier can dominate the whole metric | O(n) ✓ | "MSE is my training loss; RMSE is my reported metric" |
+    | **RMSE** | Same units as target; penalizes large errors; standard benchmark | Sensitive to outliers; optimizes mean not median | O(n) ✓ | "RMSE >> MAE signals heavy-tailed errors — go check for outliers" |
+    | **MAPE** | Scale-free; percentage is intuitive; compare across different datasets | Undefined at y=0; biased toward underestimates; asymmetric | O(n) ✓ | "I avoid MAPE for demand forecasting — zero-sales days blow it up" |
+    | **SMAPE** | Symmetric; handles near-zero y better than MAPE | Still breaks at exact zeros; less standardized | O(n) ✓ | "SMAPE is MAPE's more stable sibling" |
+    | **R²** | Intuitive % of variance explained; automatic baseline comparison | Increases with features (use Adj. R²); meaningless to compare across datasets | O(n) ✓ | "R²=0.85 means the model explains 85% of variance vs. always predicting the mean" |
+    | **Huber** | Robust AND differentiable; best of both worlds | Hyperparameter δ to tune; less standardized | O(n) ✓ | "Huber is my default when I suspect label noise in regression" |
+
+    > **Diagnostic rule:** if RMSE/MAE ratio > 1.5, you have outliers dominating MSE. Investigate before choosing which metric to optimize.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## Ranking Metrics
+
+    > **"In search, recommendations, and retrieval — the order matters as much as the set."**
+
+    Ranking metrics answer: *not just "did we find it?" but "did we surface it early enough?"*
+
+    A correct result at position 1 is worth far more than the same result at position 100.
+
+    **Precision@K** = (relevant items in top K) / K
+    - "Of the first K results shown, what fraction were relevant?"
+    - Pros: simple, maps directly to fixed review budgets ("we review top 100/day")
+    - Cons: rank-insensitive within K (pos 1 = pos K if both relevant); ignores everything below K
+
+    **Recall@K** = (relevant items in top K) / (total relevant items)
+    - "Of all relevant items, what fraction did we surface in top K?"
+    - Pros: completeness-focused; essential for legal discovery, medical retrieval
+    - Cons: trivially gamed by inflating K; doesn't penalize returning irrelevant items
+
+    **MRR (Mean Reciprocal Rank)** = mean(1 / rank of first relevant result)
+    - "How far down did the user have to scroll to find *something* useful?"
+    - Pros: fast to compute; captures first-hit quality
+    - Cons: ignores everything after the first relevant result
+
+    **MAP (Mean Average Precision)** = mean of per-query Average Precision
+    - AP = mean of P@k at each position k where a relevant item appears
+    - Pros: rank-aware; classical IR benchmark; rewards getting relevant items earlier
+    - Cons: binary relevance only — can't express "somewhat relevant"
+
+    **NDCG@K (Normalized Discounted Cumulative Gain)**
+    - DCG = Σ relevanceᵢ / log₂(rankᵢ + 1) — position discount makes rank 1 worth ~14× rank 10
+    - NDCG = DCG / IDCG (ideal DCG = DCG of the perfect ranking), normalizes to [0, 1]
+    - Pros: graded relevance (0=bad, 1=ok, 2=great, 3=perfect); gold standard in industry
+    - Cons: requires relevance grades (labeling cost); more complex to implement and explain
+    """)
+    return
+
+
+@app.cell
+def ranking_metrics_viz():
+    import numpy as _np
+    import matplotlib as _matplotlib
+    _matplotlib.use("Agg")
+    import matplotlib.pyplot as _plt
+
+    _fig, _axes = _plt.subplots(1, 3, figsize=(16, 6))
+
+    # — Left: position discount curve —
+    _ax1 = _axes[0]
+    _pos = _np.arange(1, 21)
+    _disc = 1.0 / _np.log2(_pos + 1)
+    _colors_disc = _plt.cm.RdYlGn(_disc / _disc.max())
+    _ax1.bar(_pos, _disc, color=_colors_disc, edgecolor="white", alpha=0.9)
+    _ax1.set_xlabel("Rank Position", fontsize=11)
+    _ax1.set_ylabel("Discount  1/log₂(pos+1)", fontsize=11)
+    _ax1.set_title("NDCG Position Discount\nPos 1 is worth ~14× pos 10",
+                  fontsize=11, fontweight="bold")
+    _ax1.annotate(f"Rank 1: {_disc[0]:.2f}",
+                 xy=(1, _disc[0]), xytext=(4, 0.88),
+                 fontsize=9, arrowprops=dict(arrowstyle="->"))
+    _ax1.annotate(f"Rank 10: {_disc[9]:.2f}",
+                 xy=(10, _disc[9]), xytext=(12, 0.28),
+                 fontsize=9, arrowprops=dict(arrowstyle="->"))
+    _ax1.grid(True, axis="y", alpha=0.3)
+
+    # — Center: ranked list comparison (three systems) —
+    _ax2 = _axes[1]
+    _K = 10
+    # graded relevance: 0=irrelevant, 1=ok, 2=good, 3=perfect
+    _sys_A = [3, 2, 2, 1, 0, 1, 0, 0, 1, 0]
+    _sys_B = [0, 0, 1, 2, 3, 1, 0, 2, 0, 0]
+    _sys_C = [2, 0, 3, 0, 1, 0, 2, 0, 0, 1]
+
+    def _dcg(rels):
+        return sum(r / _np.log2(i + 2) for i, r in enumerate(rels))
+
+    def _ndcg(rels):
+        _ideal = sorted(rels, reverse=True)
+        _idcg = _dcg(_ideal)
+        return _dcg(rels) / _idcg if _idcg > 0 else 0.0
+
+    _color_map = {0: "#ECF0F1", 1: "#F9E79F", 2: "#F39C12", 3: "#27AE60"}
+    _sys_defs = [
+        ("System A  (NDCG={:.3f})".format(_ndcg(_sys_A)), _sys_A, "#27AE60"),
+        ("System B  (NDCG={:.3f})".format(_ndcg(_sys_B)), _sys_B, "#E74C3C"),
+        ("System C  (NDCG={:.3f})".format(_ndcg(_sys_C)), _sys_C, "#F39C12"),
+    ]
+    _y_starts = [0.68, 0.38, 0.08]
+    _bh = 0.22
+    for _y0, (_label, _rels, _lc) in zip(_y_starts, _sys_defs):
+        _ax2.text(-0.3, _y0 + _bh / 2, _label, ha="right", va="center",
+                 fontsize=8, fontweight="bold", color=_lc)
+        for _p, _r in enumerate(_rels):
+            _rect = _plt.Rectangle([_p, _y0], 0.88, _bh,
+                                   facecolor=_color_map[_r], edgecolor="white", lw=2)
+            _ax2.add_patch(_rect)
+            _ax2.text(_p + 0.44, _y0 + _bh / 2, str(_r),
+                     ha="center", va="center", fontsize=9, fontweight="bold")
+    _ax2.set_xlim(-3.8, 10); _ax2.set_ylim(0, 0.98)
+    _ax2.set_xticks(range(_K))
+    _ax2.set_xticklabels([f"@{i+1}" for i in range(_K)], fontsize=8)
+    _ax2.set_yticks([])
+    _ax2.set_title("Three Systems, Same Results — Different Positions\n0=irrelevant  1=ok  2=good  3=perfect",
+                  fontsize=11, fontweight="bold")
+    _ax2.set_xlabel("Rank Position", fontsize=11)
+    _ax2.grid(True, axis="x", alpha=0.2)
+
+    # — Right: metric comparison bar chart —
+    _ax3 = _axes[2]
+
+    def _p_at_k(rels, k=5):
+        return sum(1 for r in rels[:k] if r > 0) / k
+
+    def _mrr(rels):
+        for i, r in enumerate(rels):
+            if r > 0:
+                return 1.0 / (i + 1)
+        return 0.0
+
+    _metric_labels = ["Precision@5", "MRR", "NDCG@10"]
+    _metric_fns    = [_p_at_k, _mrr, _ndcg]
+    _bar_colors    = ["#27AE60", "#E74C3C", "#F39C12"]
+    _sys_labels    = ["Sys A\n(good)", "Sys B\n(poor)", "Sys C\n(mixed)"]
+
+    _x_pos = _np.arange(len(_metric_labels))
+    _w = 0.25
+    for _idx, (_rels, _bc, _sl) in enumerate(zip([_sys_A, _sys_B, _sys_C], _bar_colors, _sys_labels)):
+        _vals = [fn(_rels) for fn in _metric_fns]
+        _bars = _ax3.bar(_x_pos + (_idx - 1) * _w, _vals, _w,
+                        label=_sl, color=_bc, alpha=0.85, edgecolor="white")
+        for _bar, _val in zip(_bars, _vals):
+            _ax3.text(_bar.get_x() + _bar.get_width() / 2, _val + 0.01,
+                     f"{_val:.2f}", ha="center", va="bottom", fontsize=8, fontweight="bold")
+
+    _ax3.set_xticks(_x_pos)
+    _ax3.set_xticklabels(_metric_labels, fontsize=10)
+    _ax3.set_ylim(0, 1.25)
+    _ax3.set_ylabel("Score", fontsize=11)
+    _ax3.set_title("P@5 vs MRR vs NDCG — Same Data, Different Verdict\nMetric choice can change which system wins",
+                  fontsize=11, fontweight="bold")
+    _ax3.legend(fontsize=9); _ax3.grid(True, axis="y", alpha=0.3)
+
+    _fig.suptitle("Ranking Metrics: Why Position Matters and How Each Metric Captures It",
+                 fontsize=13, fontweight="bold")
+    _fig.tight_layout()
+    return _fig
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ### Ranking Metrics — Pros, Cons & Scalability
+
+    | Metric | Pros ✓ | Cons ✗ | Scalable? | Use when |
+    |--------|--------|--------|-----------|----------|
+    | **Precision@K** | Simple; maps to fixed review budgets | Rank-insensitive within K | O(n log n) ✓ | "We review top 100 flagged items per day" |
+    | **Recall@K** | Completeness; legal/compliance retrieval | Gamed by increasing K; ignores precision | O(n log n) ✓ | Document retrieval where missing results is costly |
+    | **MRR** | Captures first-hit latency; fast to compute | Ignores all results after first relevant one | O(n log n) ✓ | Q&A / navigational search with one right answer |
+    | **MAP** | Rank-aware; classic IR benchmark | Binary relevance only — can't express "somewhat relevant" | O(n log n) ✓ | Academic IR benchmarks; binary-label evaluation |
+    | **NDCG** | Graded relevance; normalized; industry standard (Netflix, Spotify, Google) | Requires relevance grades (labeling cost); more complex | O(n log n) ✓ | Recommender systems; search with graded labels |
+    | **Hit Rate@K** | Simple; "did we include the clicked item?" | Doesn't distinguish rank within top K | O(n log n) ✓ | Collaborative filtering; implicit feedback systems |
+
+    **Production scalability notes:**
+    - All ranking metrics require sorting → O(n log n) per query; trivially parallelizable across queries
+    - At millions of queries: compute on a stratified sample (10K queries), average — error < 0.001 for NDCG
+    - Online A/B testing: use proxy metrics (CTR, dwell time, conversion) — cheaper and real-signal
+    - NDCG vs MAP in industry: MAP is common in academic IR papers; NDCG is the default in production recsys
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## Clustering & Unsupervised Metrics
+
+    When there are no ground-truth labels, evaluation becomes harder — you can only measure internal consistency or compare against held-out structure.
+
+    **Internal metrics** (no ground truth):
+
+    | Metric | Measures | Range | Better | Complexity | Caveat |
+    |--------|---------|-------|--------|-----------|--------|
+    | **Silhouette Score** | Cohesion vs. separation for each point | [−1, 1] | Higher | O(n²) — slow! | Assumes convex clusters; fails for non-spherical shapes |
+    | **Davies-Bouldin Index** | Avg ratio of within-cluster scatter to between-cluster distance | [0, ∞) | Lower | O(nk) | Biased toward compact, well-separated blobs |
+    | **Calinski-Harabasz** | Variance ratio (between-cluster / within-cluster) | [0, ∞) | Higher | O(nk) | Favors large, dense clusters; increases with k |
+    | **Inertia (WCSS)** | Within-cluster sum of squares | [0, ∞) | Lower | O(nk) | Always decreases with more clusters — use elbow method |
+
+    **External metrics** (require ground truth labels):
+
+    | Metric | Range | Perfect | Notes |
+    |--------|-------|---------|-------|
+    | **ARI** (Adjusted Rand Index) | [−1, 1] | 1.0 | Chance-corrected; 0 = random assignment |
+    | **NMI** (Normalized Mutual Info) | [0, 1] | 1.0 | Handles different numbers of clusters well |
+    | **Homogeneity** | [0, 1] | 1.0 | Each cluster contains only one class |
+    | **Completeness** | [0, 1] | 1.0 | All instances of a class in one cluster |
+    | **V-measure** | [0, 1] | 1.0 | Harmonic mean of H and C — F1 analogue for clustering |
+
+    **Scalability warning:** Silhouette is O(n²) pairwise distances — infeasible above ~50K samples.
+    At scale: run on a random subsample (5K–10K points), or switch to Davies-Bouldin which is O(nk).
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## LLM Evaluation — Why It's Fundamentally Different
+
+    > **Classification:** one right answer — compare directly.
+    > **LLM generation:** infinite valid outputs — "Paris is the capital of France" and
+    > "The capital of France is Paris" are both correct but score differently on n-gram metrics.
+
+    This is the core challenge: surface-form comparison fails for generation tasks.
+
+    ### The evaluation stack (cheapest → most reliable):
+
+    ```
+    ┌─────────────────────────────────────────────────────────────┐
+    │ Level 4: Human Evaluation      ← gold standard, expensive  │
+    │          (human raters, preference A/B tests)               │
+    ├─────────────────────────────────────────────────────────────┤
+    │ Level 3: LLM-as-Judge          ← strong proxy, scalable    │
+    │          (GPT-4 / Claude scoring generations)               │
+    ├─────────────────────────────────────────────────────────────┤
+    │ Level 2: Semantic Metrics      ← model-based, handles para- │
+    │          (BERTScore, BLEURT)     phrase; needs GPU          │
+    ├─────────────────────────────────────────────────────────────┤
+    │ Level 1: Reference-Based       ← fast, cheap, brittle      │
+    │          (BLEU, ROUGE)           use only where surface     │
+    │                                  form matters (translation) │
+    └─────────────────────────────────────────────────────────────┘
+    ```
+
+    ### Task-to-metric mapping:
+
+    | Task | Primary | Secondary | Avoid |
+    |------|---------|-----------|-------|
+    | Machine translation | BLEU, BLEURT | BERTScore | Single ROUGE |
+    | Summarization | ROUGE-L, BERTScore | LLM-judge (coherence, coverage) | BLEU |
+    | Question answering | Exact Match, Token-F1 | BERTScore | BLEU |
+    | Open-ended generation | LLM-as-judge | Human eval, G-Eval | Any n-gram metric |
+    | RAG / grounded QA | RAGAS faithfulness | Context precision/recall | Unconstrained BLEU |
+    | Code generation | Pass@K (unit tests) | CodeBLEU | Pure text metrics |
+    | Dialog / chatbot | LLM-judge, user retention | BLEU (for templated forms) | Accuracy |
+    """)
+    return
+
+
+@app.cell
+def llm_ngram_metrics_viz():
+    import numpy as _np
+    import matplotlib as _matplotlib
+    _matplotlib.use("Agg")
+    import matplotlib.pyplot as _plt
+    from collections import Counter as _Counter
+    import math as _math
+
+    def _ngrams(tokens, n):
+        return [tuple(tokens[i:i + n]) for i in range(len(tokens) - n + 1)]
+
+    def _bleu(reference, hypothesis, max_n=4):
+        _ref = reference.lower().split()
+        _hyp = hypothesis.lower().split()
+        if not _hyp:
+            return 0.0
+        _bp = min(1.0, _math.exp(1 - len(_ref) / len(_hyp)))
+        _scores = []
+        for _n in range(1, max_n + 1):
+            _ref_ng = _Counter(_ngrams(_ref, _n))
+            _hyp_ng = _Counter(_ngrams(_hyp, _n))
+            _clipped = sum(min(c, _ref_ng[g]) for g, c in _hyp_ng.items())
+            _total = max(sum(_hyp_ng.values()), 1)
+            _scores.append(_clipped / _total)
+        if min(_scores) == 0:
+            return 0.0
+        return round(_bp * _math.exp(sum(_math.log(p) for p in _scores) / max_n), 4)
+
+    def _rouge_n(reference, hypothesis, n=1):
+        _ref = reference.lower().split()
+        _hyp = hypothesis.lower().split()
+        _ref_ng = _Counter(_ngrams(_ref, n))
+        _hyp_ng = _Counter(_ngrams(_hyp, n))
+        _overlap = sum(min(c, _hyp_ng[g]) for g, c in _ref_ng.items())
+        return round(_overlap / max(sum(_ref_ng.values()), 1), 4)
+
+    def _rouge_l(reference, hypothesis):
+        _ref = reference.lower().split()
+        _hyp = hypothesis.lower().split()
+        _m, _n = len(_ref), len(_hyp)
+        if _m == 0 or _n == 0:
+            return 0.0
+        _dp = [[0] * (_n + 1) for _ in range(_m + 1)]
+        for _i in range(1, _m + 1):
+            for _j in range(1, _n + 1):
+                if _ref[_i - 1] == _hyp[_j - 1]:
+                    _dp[_i][_j] = _dp[_i - 1][_j - 1] + 1
+                else:
+                    _dp[_i][_j] = max(_dp[_i - 1][_j], _dp[_i][_j - 1])
+        _lcs = _dp[_m][_n]
+        _p = _lcs / _n if _n else 0
+        _r = _lcs / _m if _m else 0
+        if _p + _r == 0:
+            return 0.0
+        return round(2 * _p * _r / (_p + _r), 4)
+
+    _ref = "The mitochondria is the powerhouse of the cell and produces ATP through cellular respiration"
+
+    _candidates = {
+        "Perfect match":             "The mitochondria is the powerhouse of the cell and produces ATP through cellular respiration",
+        "Paraphrase\n(semantic ≈)":  "Mitochondria generate ATP via cellular respiration and act as the cell power source",
+        "Partial answer":            "The mitochondria produces ATP",
+        "Wrong order\n(same words)": "ATP through cellular respiration the powerhouse of the cell is the mitochondria",
+        "Completely wrong":          "The nucleus contains genetic material and controls cell division and protein synthesis",
+        "Too short":                 "mitochondria ATP",
+    }
+
+    _labels     = list(_candidates.keys())
+    _bleu_s     = [_bleu(_ref, c) for c in _candidates.values()]
+    _rouge1_s   = [_rouge_n(_ref, c, 1) for c in _candidates.values()]
+    _rouge2_s   = [_rouge_n(_ref, c, 2) for c in _candidates.values()]
+    _rougel_s   = [_rouge_l(_ref, c) for c in _candidates.values()]
+
+    _fig, _axes = _plt.subplots(1, 2, figsize=(16, 6))
+
+    # Left: grouped bars
+    _ax1 = _axes[0]
+    _x   = _np.arange(len(_labels))
+    _w   = 0.21
+    _b1 = _ax1.bar(_x - 1.5*_w, _bleu_s,   _w, label="BLEU-4",  color="#3498DB", alpha=0.85, edgecolor="white")
+    _b2 = _ax1.bar(_x - 0.5*_w, _rouge1_s, _w, label="ROUGE-1", color="#E67E22", alpha=0.85, edgecolor="white")
+    _b3 = _ax1.bar(_x + 0.5*_w, _rouge2_s, _w, label="ROUGE-2", color="#9B59B6", alpha=0.85, edgecolor="white")
+    _b4 = _ax1.bar(_x + 1.5*_w, _rougel_s, _w, label="ROUGE-L", color="#27AE60", alpha=0.85, edgecolor="white")
+    for _bset in [_b1, _b2, _b3, _b4]:
+        for _bar in _bset:
+            _h = _bar.get_height()
+            if _h > 0.03:
+                _ax1.text(_bar.get_x() + _bar.get_width() / 2, _h + 0.005,
+                         f"{_h:.2f}", ha="center", va="bottom", fontsize=7, rotation=90)
+    _ax1.set_xticks(_x)
+    _ax1.set_xticklabels(_labels, rotation=22, ha="right", fontsize=9)
+    _ax1.set_ylim(0, 1.25)
+    _ax1.set_ylabel("Score", fontsize=11)
+    _ax1.set_title("BLEU & ROUGE on 6 Candidate Outputs\nParaphrase scores nearly as low as 'completely wrong'",
+                  fontsize=11, fontweight="bold")
+    _ax1.legend(fontsize=9); _ax1.grid(True, axis="y", alpha=0.3)
+    _ax1.annotate("Semantically correct\nbut different words →\nscores poorly!",
+                 xy=(1, _rouge1_s[1] + 0.02), xytext=(2.5, 0.65),
+                 fontsize=8, color="#E74C3C",
+                 arrowprops=dict(arrowstyle="->", color="#E74C3C"))
+
+    # Right: heatmap
+    _ax2 = _axes[1]
+    _matrix = _np.array([_bleu_s, _rouge1_s, _rouge2_s, _rougel_s])
+    _im = _ax2.imshow(_matrix, aspect="auto", cmap="RdYlGn", vmin=0, vmax=1)
+    _plt.colorbar(_im, ax=_ax2, shrink=0.8)
+    _ax2.set_xticks(range(len(_labels)))
+    _ax2.set_xticklabels(_labels, rotation=28, ha="right", fontsize=8)
+    _ax2.set_yticks(range(4))
+    _ax2.set_yticklabels(["BLEU-4", "ROUGE-1", "ROUGE-2", "ROUGE-L"], fontsize=10)
+    for _i in range(4):
+        for _j in range(len(_labels)):
+            _v = _matrix[_i, _j]
+            _ax2.text(_j, _i, f"{_v:.2f}", ha="center", va="center",
+                     fontsize=9, fontweight="bold",
+                     color="white" if _v < 0.35 else "black")
+    _ax2.set_title("Heatmap: n-gram Metrics Miss Semantic Equivalence\n'Paraphrase' should score near 'Perfect match'",
+                  fontsize=11, fontweight="bold")
+
+    _fig.suptitle("BLEU & ROUGE: Fast and Cheap — but Surface-Form Metrics Miss Meaning",
+                 fontsize=13, fontweight="bold")
+    _fig.tight_layout()
+    return _fig
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ### BLEU & ROUGE — Mechanics, Pros, Cons & When to Use
+
+    **BLEU** measures n-gram *precision* (how much of the hypothesis appears in the reference):
+    - BLEU = BP × exp(Σ wₙ log pₙ) where pₙ = clipped n-gram precision, BP = brevity penalty
+    - Clipping: each n-gram in the hypothesis is counted at most as many times as it appears in the reference (prevents padding)
+    - BLEU-4 (4-gram) is the standard; single-sentence BLEU is unreliable — always average over the corpus
+
+    **ROUGE** measures n-gram *recall* (how much of the reference is covered):
+    - **ROUGE-1:** unigram recall — broad coverage signal
+    - **ROUGE-2:** bigram recall — phrase-level signal
+    - **ROUGE-L:** F1 of Longest Common Subsequence — word order matters but allows gaps
+
+    | Metric | Precision/Recall | Order-sensitive | Multi-reference | Scalable | Best for |
+    |--------|-----------------|-----------------|-----------------|---------|---------|
+    | BLEU-4 | Precision | Partially (BP) | Yes (take max) | O(n) ✓ | Machine translation |
+    | ROUGE-1 | Recall | No | Yes | O(n) ✓ | Summarization coverage |
+    | ROUGE-2 | Recall | No | Yes | O(n) ✓ | Summarization fluency |
+    | ROUGE-L | F1 (LCS) | Yes | Yes | O(nm) ✓ | Summarization; sentence-level |
+    | BERTScore | F1 (cosine sim) | No | Single | O(n·d) GPU | Any generation task |
+
+    > **The key failure mode:** a semantically perfect paraphrase scores near 0 on BLEU and low on ROUGE.
+    > Reserve n-gram metrics for tasks where surface form genuinely matters (translation, template filling).
+    > For anything requiring understanding of meaning, use BERTScore or LLM-as-judge.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## BERTScore — Semantic Similarity via Contextual Embeddings
+
+    BERTScore fixes the paraphrase problem by comparing *representations* not *tokens*.
+
+    ### How it works:
+    1. Encode every token in reference and hypothesis using a pre-trained BERT/RoBERTa model
+    2. For each hypothesis token, find its most similar reference token (greedy max cosine similarity)
+    3. **Precision:** mean of max-similarity for each hypothesis token → "how much of what I said is in the reference?"
+    4. **Recall:** mean of max-similarity for each reference token → "how much of the reference did I cover?"
+    5. **F1:** harmonic mean of BERTScore-P and BERTScore-R
+
+    ```python
+    # pip install bert-score
+    from bert_score import score
+    P, R, F1 = score(candidates, references, lang="en", model_type="roberta-large")
+    # Returns tensors of shape (num_samples,)
+    ```
+
+    ### Pros, Cons & Scalability:
+
+    | Aspect | BLEU / ROUGE | BERTScore |
+    |--------|-------------|-----------|
+    | Paraphrase handling | Poor | Good |
+    | Human correlation | ~0.5–0.6 | ~0.7–0.8 |
+    | Speed | Very fast (CPU, O(n)) | Slower (GPU needed for scale) |
+    | Interpretability | High — count n-grams | Lower — lives in embedding space |
+    | Domain sensitivity | None | Must pick the right BERT variant |
+    | Cost at 1M samples | Negligible | ~1–2 GPU-hours |
+    | Multi-language | Via multi-ref tricks | xlm-roberta-large natively |
+
+    **Model selection guide:**
+    - General text: `roberta-large` (default)
+    - Code: `microsoft/codebert-base`
+    - Multilingual: `xlm-roberta-large`
+    - Biomedical: `allenai/scibert_scivocab_uncased`
+
+    **Scalability tip:** pre-compute and cache reference embeddings. At eval time, only encode candidates — halves compute for fixed test sets.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## LLM-as-Judge — Scalable Human-Quality Evaluation
+
+    Use a powerful LLM (GPT-4, Claude Sonnet) to evaluate other model outputs.
+    Human agreement: **~80–85%** — far better than BLEU/ROUGE (~50–65%).
+
+    ### Two evaluation modes:
+
+    **Pointwise (absolute scoring):**
+    ```
+    Rate the following answer on each dimension from 1 (poor) to 5 (excellent):
+    - Correctness: Does it answer the question accurately?
+    - Completeness: Does it cover all relevant aspects?
+    - Conciseness: Is it appropriately brief?
+
+    Question: {question}
+    Reference answer: {reference}
+    Model answer: {answer}
+
+    Respond with JSON: {"correctness": X, "completeness": X, "conciseness": X, "reasoning": "..."}
+    ```
+
+    **Pairwise (comparative — higher reliability):**
+    ```
+    Which answer better addresses the question? Respond with "A", "B", or "tie".
+    Reason step-by-step before your verdict.
+
+    Question: {question}
+    Answer A: {answer_a}
+    Answer B: {answer_b}
+    ```
+
+    ### G-Eval: chain-of-thought scoring
+    Ask the judge to reason before scoring → improves reliability by ~10% vs. direct scoring.
+    Ask for a probability distribution over scores, not just a single score → more signal.
+
+    ### Pros, Cons & Scalability:
+
+    | Aspect | Detail |
+    |--------|--------|
+    | **Pros** | High human correlation; flexible criteria; handles open-ended tasks |
+    | **Positional bias** | In pairwise, favors the first answer shown → always swap A/B and average |
+    | **Verbose bias** | Longer answers rated higher even if less accurate → penalize verbosity explicitly |
+    | **Self-preference** | GPT-4 rates GPT-4 outputs higher → use a different judge model |
+    | **Cost** | ~$0.01–0.05/eval at GPT-4 pricing. 10K evals ≈ $100–500 |
+    | **Scale** | Async API calls in parallel; cache judge responses; deduplicate identical outputs |
+    | **When to use** | Open-ended generation, instruction following, chatbot quality, creative tasks |
+    | **When to avoid** | Exact-match tasks (use EM); structured outputs (use schema validation + EM) |
+
+    > **Production eval cadence:** run BLEU/ROUGE on every PR (fast regression check), LLM-judge
+    > on a 5% sample nightly (quality signal), human eval on major releases or product launches.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## RAG Evaluation — The RAGAS Framework
+
+    RAG has two independent components to evaluate: **retrieval quality** and **generation quality**.
+    RAGAS provides metrics for both without requiring human labels for most of them.
+
+    ```
+    User query
+        │
+        ▼
+    [Retriever] ──→ context chunks  ←── evaluate: Context Precision, Context Recall
+        │
+        ▼
+    [Generator] ──→ final answer    ←── evaluate: Faithfulness, Answer Relevancy
+    ```
+
+    ### RAGAS Metrics:
+
+    | Metric | What it measures | Requires | Score |
+    |--------|-----------------|---------|-------|
+    | **Faithfulness** | Does the answer contain *only* claims supported by the context? | LLM judge (NLI) | [0, 1] higher = better |
+    | **Answer Relevancy** | Does the answer actually address the question asked? | Embeddings (cosine sim) | [0, 1] |
+    | **Context Precision** | Are the retrieved chunks actually relevant to the question? | LLM judge | [0, 1] |
+    | **Context Recall** | Were all facts needed to answer the question retrieved? | Ground truth answers | [0, 1] |
+    | **Context Relevance** | What fraction of retrieved context is relevant to the query? | LLM judge | [0, 1] |
+
+    ### Debugging with RAGAS:
+
+    ```
+    Low Faithfulness      → Generator hallucinates beyond context
+                            Fix: stricter system prompt ("only use provided context"); retrieval-constrained decoding
+    Low Context Precision → Retriever fetches irrelevant chunks
+                            Fix: better embedding model; cross-encoder reranker; smaller chunk size
+    Low Context Recall    → Retriever misses relevant chunks
+                            Fix: increase K; larger chunk size; hybrid search (dense + BM25)
+    Low Answer Relevancy  → Generator produces generic / off-topic answers
+                            Fix: better instruction prompting; add query to generation prompt explicitly
+    ```
+
+    ```python
+    from ragas import evaluate
+    from ragas.metrics import faithfulness, answer_relevancy, context_precision, context_recall
+
+    # dataset: HuggingFace Dataset with columns:
+    #   question, answer, contexts (list of strings), ground_truth
+    results = evaluate(dataset, metrics=[faithfulness, answer_relevancy, context_precision])
+    print(results)  # {'faithfulness': 0.82, 'answer_relevancy': 0.91, 'context_precision': 0.74}
+    ```
+
+    **Cost at scale:** RAGAS uses LLM calls → ~$0.005–0.02/sample. 10K eval set ≈ $50–200.
+    Cache LLM responses. Run nightly, not on every commit.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## Alignment & Safety Metrics — Beyond Quality
+
+    For production LLMs, quality is necessary but not sufficient.
+
+    | Metric | What it measures | How measured | Tools |
+    |--------|-----------------|-------------|-------|
+    | **Hallucination Rate** | % of outputs with ungrounded factual claims | LLM NLI judge; FactScore | RAGAS faithfulness, FactScore |
+    | **Groundedness** | Does answer stay within provided context? | NLI: premise=context, hypothesis=answer | RAGAS, Azure AI Evaluation |
+    | **Toxicity** | % of outputs with harmful/offensive content | Classifier (Perspective API, Detoxify) | `pip install detoxify` |
+    | **Refusal Rate** | Does model decline genuinely harmful requests? | Red-team prompts + classifier | Custom; Anthropic eval suite |
+    | **Instruction Following** | Does output match format/length/style instructions? | LLM-judge on rubric; regex for structure | IFEval benchmark |
+    | **Bias / Fairness** | Demographic disparities in outputs | Counterfactual pairs; group disparity metrics | BOLD, WinoBias |
+    | **Calibration (LLM)** | Does expressed confidence match actual accuracy? | ECE on verbalized confidence scores | Custom eval harness |
+
+    ### FactScore — atomic fact verification:
+    ```
+    Long-form output
+        → decompose into atomic facts (LLM): ["Mitochondria produce ATP", "ATP = adenosine triphosphate", ...]
+        → verify each fact against a knowledge source (Wikipedia, retrieval index)
+        → FactScore = % of atomic facts that are supported
+    ```
+    Key advantage: granular — tells you *which* facts are wrong, not just "this output is bad."
+
+    ### Production monitoring checklist:
+    - **Hallucination rate** — track per query type; alert if rate rises above baseline
+    - **Toxicity** — real-time classifier on every output before serving; block + log
+    - **Groundedness** — especially critical for RAG; cite sources so users can verify
+    - **Latency** — P50/P95/P99 end-to-end; quality means nothing if the system is too slow
+    - **User feedback** — thumbs up/down, retry rate, session abandonment — free signal
+    - **Drift** — monitor metric distributions over time; input distribution shift degrades all metrics
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
     ## Choosing the Right Metric — Decision Framework
 
     ```
-    Is the problem imbalanced (>80/20)?
-    ├── YES → Don't use accuracy
-    │   ├── Is cost asymmetry clear?
-    │   │   ├── FN is much worse → Optimize recall (with precision floor)
-    │   │   ├── FP is much worse → Optimize precision (with recall floor)
-    │   │   └── Roughly equal   → Use F1
-    │   └── Need threshold-independent comparison?
-    │       └── Use AUC-PR (NOT AUC-ROC)
-    └── NO (balanced) → Accuracy is OK, AUC-ROC is fine
-
-    Do you use predicted probabilities for decisions?
-    ├── YES → Check calibration, fix if needed (Platt / isotonic)
-    └── NO  → Calibration doesn't matter
+    ┌─── What type of problem? ─────────────────────────────────────────┐
+    │                                                                    │
+    │  CLASSIFICATION                                                    │
+    │  ├─ Imbalanced (>80/20)?                                          │
+    │  │   ├─ YES → skip accuracy; use AUC-PR or F-beta                 │
+    │  │   │        FN >> FP? → recall / F2                             │
+    │  │   │        FP >> FN? → precision / F0.5                        │
+    │  │   └─ NO  → accuracy OK; AUC-ROC fine                          │
+    │  └─ Using probabilities for decisions? → check calibration        │
+    │       (Platt/isotonic for trees; LR is already calibrated)        │
+    │                                                                    │
+    │  REGRESSION                                                        │
+    │  ├─ Outliers in data?         → MAE or Huber                      │
+    │  ├─ Large errors catastrophic? → RMSE or MSE                      │
+    │  ├─ Need scale-free comparison? → MAPE (if y ≠ 0) / SMAPE        │
+    │  └─ Explaining variance to stakeholders? → R²                     │
+    │                                                                    │
+    │  RANKING / RETRIEVAL                                               │
+    │  ├─ Fixed review budget? → Precision@K                            │
+    │  ├─ One right answer (Q&A)? → MRR                                 │
+    │  ├─ Graded relevance available? → NDCG (industry standard)        │
+    │  └─ Binary labels only? → MAP                                     │
+    │                                                                    │
+    │  CLUSTERING                                                        │
+    │  ├─ No ground truth → Silhouette (small n), Davies-Bouldin (large)│
+    │  └─ Ground truth available → ARI or NMI                           │
+    │                                                                    │
+    │  LLM / GENERATION                                                  │
+    │  ├─ Translation / templated output → BLEU, ROUGE                  │
+    │  ├─ Summarization → ROUGE-L, BERTScore                            │
+    │  ├─ Open-ended / creative → LLM-as-judge (pointwise or pairwise)  │
+    │  ├─ RAG system → RAGAS (faithfulness + context precision/recall)   │
+    │  ├─ Code generation → Pass@K (unit tests)                         │
+    │  └─ Safety-critical → Hallucination rate, toxicity, groundedness  │
+    └────────────────────────────────────────────────────────────────────┘
     ```
 
-    **Bonus — Precision@K:** For ranking problems with a fixed review budget
-    (e.g., "we can review 100 flagged transactions per day"), ask: "of the top K items I
-    surfaced, what fraction are relevant?" More actionable than AUC-PR when capacity is constrained.
+    **Cross-cutting rules:**
+    - Never optimize a proxy metric that doesn't match business cost — always trace metric back to FP/FN costs
+    - Report multiple metrics: headline metric + sanity-check metric (e.g., NDCG + coverage)
+    - At scale: O(n) metrics are free; O(n²) metrics (Silhouette, pairwise BLEU) need sampling strategies
+    - For LLMs in production: BLEU/ROUGE for CI regression tests, LLM-judge on 5% sample nightly, human eval for releases
     """)
     return
 
@@ -853,16 +1637,29 @@ def _(mo):
 
     | Question | Answer |
     |----------|--------|
-    | When does accuracy mislead? | Imbalanced classes. 99% accuracy on 1% fraud = predicting everything as not-fraud. |
-    | What's precision? | TP / (TP + FP). Of predicted positives, what fraction are correct? Trustworthiness of flags. |
-    | What's recall? | TP / (TP + FN). Of actual positives, what fraction did we catch? Completeness of detection. |
-    | Why is F1 a harmonic mean not arithmetic? | Punishes when either P or R is near zero. (0.99 + 0.01)/2 = 0.50 but F1 = 0.02. |
-    | When to use AUC-ROC vs AUC-PR? | AUC-PR for imbalanced data (<10% positive). AUC-ROC inflates when negatives dominate (FPR denominator = TN + FP is huge). |
-    | What does calibration mean? | Predicted probabilities match actual frequencies. 70% prediction → 70% actual positive rate. |
-    | Which models are well-calibrated by default? | Logistic regression. Trees and neural nets typically need calibration. |
-    | How do you fix poor calibration? | Platt scaling (`method='sigmoid'`) or isotonic regression via `CalibratedClassifierCV`. |
-    | Fraud detection: precision or recall? | Recall (don't miss fraud), but with a precision floor (don't block all customers). |
-    | Practical metric for imbalanced ranking? | Precision@K — of the top K flagged, how many are actually positive? |
+    | When does accuracy mislead? | Imbalanced classes. 99% accuracy on 1% fraud dataset = predicting nothing as fraud. |
+    | What's precision? | TP/(TP+FP). Of predicted positives, what fraction are correct? Trustworthiness of flags. |
+    | What's recall? | TP/(TP+FN). Of actual positives, what fraction did we catch? Completeness of detection. |
+    | Why F1 harmonic not arithmetic? | Punishes extremes. (0.99+0.01)/2 = 0.50 but F1 = 0.02. Arithmetic hides failure. |
+    | AUC-ROC vs AUC-PR? | AUC-PR for imbalanced (<10% positive). ROC inflates because huge TN pool deflates FPR. |
+    | What does calibration mean? | Predicted probability matches actual frequency. 70% prediction → 70% actually positive. |
+    | Which models are uncalibrated? | Random Forest, Gradient Boosting, naive Bayes, deep nets. Logistic regression is calibrated by design. |
+    | How to fix calibration? | Platt scaling (sigmoid) or isotonic regression via CalibratedClassifierCV. |
+    | MAE vs RMSE — which to use? | RMSE > MAE when outliers present. If RMSE/MAE > 1.5, investigate outliers. Use MAE for robustness. |
+    | MAPE failure case? | y = 0 → division by zero. Use SMAPE or MAE for sparse/zero targets. |
+    | What does R² = 0 mean? | Model no better than predicting the mean. R² < 0 = worse than mean. |
+    | Huber loss advantage? | Robust to outliers AND differentiable everywhere. MAE is non-differentiable at 0; MSE explodes. |
+    | NDCG vs MAP? | NDCG supports graded relevance; MAP is binary only. NDCG = industry standard (recsys). |
+    | MRR best for what? | Navigational queries / Q&A where there's one right answer you need to surface first. |
+    | Precision@K vs NDCG? | P@K is rank-insensitive within K; NDCG rewards putting best results first. |
+    | Why does BLEU fail on paraphrases? | Measures surface n-gram precision — different words = low score even if meaning is identical. |
+    | ROUGE-1 vs ROUGE-L? | ROUGE-1: unigram recall (coverage). ROUGE-L: LCS-based F1 (word order somewhat matters). |
+    | When to use BERTScore? | Any generation task where paraphrasing is valid. Needs GPU; ~7–8× more correlated with humans than BLEU. |
+    | LLM-as-judge biases? | Positional (favors first in pairwise), verbose (longer = better), self-preference. Swap order; use multiple judges. |
+    | RAGAS faithfulness = ? | % of answer claims that are supported by the retrieved context. Low → generator is hallucinating. |
+    | RAGAS context precision = ? | % of retrieved chunks that are relevant. Low → retriever fetching junk; fix embedding model or add reranker. |
+    | Silhouette scalability limit? | O(n²) pairwise distances — infeasible above ~50K samples. Subsample or use Davies-Bouldin (O(nk)). |
+    | ARI vs NMI for clustering? | ARI is chance-corrected (better for comparing); NMI handles different cluster counts better. |
     """)
     return
 
@@ -876,41 +1673,72 @@ def _(mo):
 
     ### "How do you choose an evaluation metric?"
 
-    > Start with the cost asymmetry: FN vs FP — which is worse? That determines whether you
-    > optimize precision or recall. Then check class balance — if imbalanced (>80/20), avoid
-    > accuracy and AUC-ROC, use AUC-PR or precision@K instead. Always check calibration if
-    > using predicted probabilities for threshold decisions.
+    > Start with the cost asymmetry: FN vs FP — which error is more expensive? That determines
+    > whether to optimize precision or recall. Then check class balance — if imbalanced (>80/20),
+    > avoid accuracy and AUC-ROC, use AUC-PR or precision@K. Check calibration if using probabilities
+    > for threshold or expected-value decisions. For regression, ask whether outliers are real signal
+    > or noise — that determines MAE vs RMSE vs Huber. For LLMs, ask whether surface form matters
+    > (use BLEU/ROUGE) or meaning matters (use BERTScore or LLM-as-judge).
 
     ---
 
     ### "Walk me through the precision-recall trade-off."
 
-    > As I lower the classification threshold, I catch more positives (recall goes up) but also
-    > flag more negatives (precision goes down). The optimal threshold depends on the business
-    > cost of each error type — missing fraud vs. blocking legitimate customers. The PR curve
+    > As I lower the classification threshold, I catch more positives (recall goes up) but also flag
+    > more negatives as positive (precision goes down). The optimal threshold is determined by the
+    > *relative cost* of each error type — missing fraud vs. blocking a real customer. The PR curve
     > visualizes this full trade-off; the operating point is a business decision, not a statistical one.
+    > The AUC-PR summarizes this curve as a single number — better than AUC-ROC for imbalanced data
+    > because it doesn't use TN in its denominator.
 
     ---
 
-    ### "Tell me about a time you chose metrics carefully."
+    ### "Tell me about the difference between BLEU and BERTScore."
 
-    > In my fraud detection system design, I chose AUC-PR over AUC-ROC because with 0.1% fraud
-    > rate, ROC gives misleadingly high scores. I also recommended calibrating the XGBoost model
-    > before using its probabilities for the approve/review/decline threshold decisions, since
-    > tree-based models are overconfident without calibration.
+    > BLEU measures n-gram precision — how many word sequences in my output appear in the reference.
+    > It's fast and cheap but completely fails on paraphrases: "Paris is the capital of France" and
+    > "The capital of France is Paris" score near zero BLEU against each other. BERTScore instead
+    > computes contextual embeddings for every token and takes greedy cosine similarity — so semantically
+    > similar tokens match even if they're different words. BERTScore correlates with human judgment
+    > at ~0.75 vs BLEU's ~0.55. The tradeoff: BERTScore needs GPU and is ~50× slower, so in practice
+    > I use BLEU/ROUGE for CI regression checks and BERTScore for deeper offline evaluation.
+
+    ---
+
+    ### "How would you evaluate a RAG system?"
+
+    > I'd decompose it into retrieval and generation, evaluate each independently with RAGAS.
+    > Faithfulness measures whether the generated answer sticks to what the context actually says —
+    > low faithfulness means the generator is hallucinating beyond the retrieved documents.
+    > Context precision checks if the retriever is fetching relevant chunks — low precision means
+    > we're wasting context window on noise. Context recall checks if we retrieved everything needed —
+    > low recall means the answer will be incomplete. That diagnostic decomposition tells me exactly
+    > where to focus: retriever problems (embedding model, chunk size, reranker) vs. generator problems
+    > (prompt constraints, decoding strategy).
+
+    ---
+
+    ### "What's the scalability concern with ranking metrics?"
+
+    > All ranking metrics require sorting — O(n log n) per query — which is fine for a single query
+    > but becomes expensive at millions of queries. In practice: compute offline on a stratified sample
+    > of 10K queries, which gives NDCG error < 0.001. For online A/B testing I use proxy metrics instead —
+    > CTR, dwell time, conversion — because they're real user signal and cheap to collect at scale.
+    > NDCG is for offline model comparison; online proxies are for production decisions.
 
     ---
 
     ### Connection to my other work
 
-    In my backtesting engine, I evaluate trading strategies with risk-adjusted metrics (Sharpe,
-    Sortino) rather than raw returns — for the same reason you use precision/recall instead of
-    accuracy. The naive metric hides the real performance characteristics. High raw return with
-    high drawdown = high accuracy with 0% fraud recall. The right metric always reflects the
-    actual cost structure of the problem.
+    In my backtesting engine I evaluate trading strategies with risk-adjusted metrics (Sharpe, Sortino,
+    max drawdown) rather than raw returns — for the same reason I use precision/recall instead of accuracy.
+    High raw return with high drawdown = high accuracy with 0% fraud recall. The naive metric hides the
+    actual cost structure. Picking the right metric is always about encoding what "expensive errors" means
+    in your specific domain.
     """)
     return
 
 
 if __name__ == "__main__":
     app.run()
+
