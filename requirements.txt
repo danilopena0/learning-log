@@ -1,0 +1,10 @@
+marimo==0.22.0
+numpy
+pandas
+matplotlib
+scikit-learn
+xgboost
+pydantic
+langchain
+ragas
+bert-score
