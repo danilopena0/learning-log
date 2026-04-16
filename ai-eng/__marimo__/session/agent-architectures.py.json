@@ -6,13 +6,189 @@
   },
   "cells": [
     {
+      "id": "OALe",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
       "id": "Hbol",
       "code_hash": "5977def275b0a31dd05e8be6e6f0bd60",
       "outputs": [
         {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"agent-architectures\">Agent Architectures</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-12</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>AI Engineering</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topic</td>\n<td>ReAct \u00b7 Tool Use Patterns \u00b7 Multi-Agent \u00b7 LangGraph</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "43bdef7b4216cfed5ba17172e7b92105",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"what-is-an-agent\">What is an Agent?</h2>\n<span class=\"paragraph\"><strong>Working definition:</strong> an LLM-powered system that decides its own sequence of actions\nto accomplish a goal, rather than following a fixed pipeline.</span>\n<h3 id=\"the-spectrum-of-llm-control\">The spectrum of LLM control</h3>\n<div class=\"language-teratermmacro codehilite\"><pre><span></span><code><span class=\"nv\">Hardcoded</span><span class=\"w\"> </span><span class=\"nv\">pipeline</span><span class=\"w\">  </span>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25ba<span class=\"w\">  </span><span class=\"nv\">Fully</span><span class=\"w\"> </span><span class=\"nv\">agentic</span>\n<span class=\"w\">     </span><span class=\"ss\">(</span><span class=\"nv\">no</span><span class=\"w\"> </span><span class=\"nv\">LLM</span><span class=\"ss\">)</span><span class=\"w\">          </span><span class=\"nv\">LLM</span><span class=\"o\">-</span><span class=\"nv\">in</span><span class=\"o\">-</span><span class=\"nv\">the</span><span class=\"o\">-</span><span class=\"k\">loop</span><span class=\"w\">               </span><span class=\"ss\">(</span><span class=\"nv\">LLM</span><span class=\"w\"> </span><span class=\"nv\">decides</span><span class=\"w\"> </span><span class=\"nv\">all</span><span class=\"ss\">)</span>\n<span class=\"w\">                       </span><span class=\"ss\">(</span><span class=\"nv\">most</span><span class=\"w\"> </span><span class=\"nv\">production</span><span class=\"ss\">)</span>\n</code></pre></div>\n<span class=\"paragraph\">The key question is: <strong>how much control does the LLM have over the control flow?</strong></span>\n<h3 id=\"anthropics-framing\">Anthropic's framing</h3>\n<ul>\n<li><strong>Workflows</strong> \u2014 predefined paths where the LLM fills in reasoning steps within a fixed structure</li>\n<li><strong>Agents</strong> \u2014 LLM-directed paths where the LLM dynamically decides the sequence of actions</li>\n</ul>\n<span class=\"paragraph\">Most production systems are <strong>workflows with agentic components</strong> \u2014 not fully autonomous agents.\nFull autonomy trades debuggability for flexibility, which is usually a bad deal in production.</span>\n<h3 id=\"my-interview-framing\">My interview framing</h3>\n<blockquote>\n<span class=\"paragraph\">\"I build agentic workflows, not fully autonomous agents. The LLM handles reasoning and\ntool selection, but the graph structure provides guardrails and predictability.\nFully autonomous agents are hard to debug and expensive \u2014 the graph gives me an audit trail.\"</span>\n</blockquote>\n<hr />\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>Meaning in practice</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Node</strong></td>\n<td>A function or LLM call \u2014 one step in the graph</td>\n</tr>\n<tr>\n<td><strong>Edge</strong></td>\n<td>Transition between nodes \u2014 deterministic or conditional</td>\n</tr>\n<tr>\n<td><strong>State</strong></td>\n<td>Typed dict passed between nodes \u2014 the \"working memory\"</td>\n</tr>\n<tr>\n<td><strong>Tool</strong></td>\n<td>A Python function the LLM can decide to call</td>\n</tr>\n<tr>\n<td><strong>Trace</strong></td>\n<td>The full log of inputs/outputs across all nodes</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "b55e5081841bfd06b64c3bf4c7a70141",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "fc9856aac3e3542667bf1b7c4e3e5ee1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-1-react-reason-act\">Pattern 1: ReAct (Reason + Act)</h2>\n<h3 id=\"the-loop\">The loop</h3>\n<div class=\"language-text codehilite\"><pre><span></span><code>Thought  \u2192  Action  \u2192  Observation  \u2192  Thought  \u2192  ...  \u2192  Final Answer\n</code></pre></div>\n<table>\n<thead>\n<tr>\n<th>Step</th>\n<th>What happens</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Thought</strong></td>\n<td>LLM reasons about what to do next (written as text)</td>\n</tr>\n<tr>\n<td><strong>Action</strong></td>\n<td>LLM calls a tool with specific arguments</td>\n</tr>\n<tr>\n<td><strong>Observation</strong></td>\n<td>Tool result is appended to context</td>\n</tr>\n<tr>\n<td>Repeat</td>\n<td>LLM incorporates the observation and reasons again</td>\n</tr>\n<tr>\n<td><strong>Final Answer</strong></td>\n<td>LLM signals it's done \u2014 no more tool calls</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"why-it-works\">Why it works</h3>\n<span class=\"paragraph\">Externalizing reasoning as text makes the LLM \"think out loud.\" This gives you a readable\ntrace of <em>why</em> each tool was called, and makes errors much easier to diagnose.</span>\n<h3 id=\"when-react-wins\">When ReAct wins</h3>\n<ul>\n<li>Multi-step problems where each step depends on the previous result (research, debugging, math with lookups)</li>\n<li>Tasks where the LLM needs to decide the path dynamically, not follow a fixed script</li>\n<li>Situations where an auditable reasoning chain matters (for debugging or stakeholder trust)</li>\n</ul>\n<h3 id=\"when-react-breaks\">When ReAct breaks</h3>\n<ul>\n<li>Long loops where the LLM gets confused by its accumulated context</li>\n<li>Tasks with many independent sub-tasks (better handled by parallel tool calls or multi-agent)</li>\n<li>High-latency tools \u2014 each Thought\u2192Action\u2192Observation cycle is sequential, so it stacks up</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "28b2cd3a8aa4f343e6bd386d57d3a196",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\n============================================================\nQuery: What's the weather in the capital of France?\n============================================================\n\n[Step 1]\n  Thought: I need to find the capital of France first.\n  Action: get_capital(France)\n  Observation: Paris\n\n[Step 2]\n  Thought: Now I have the capital. I'll look up the weather there.\n  Action: get_weather(Paris)\n  Observation: 15\u00b0C, partly cloudy\n\n[Step 3]\n  Thought: I have all the info I need.\n  Final Answer: The capital of France is Paris. The current weather there is 15\u00b0C, partly cloudy.\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "2377794ae546395b1fc96f242d6ddc82",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-react-in-practice\">My Projects \u2014 ReAct in Practice</h3>\n<span class=\"paragraph\"><strong>Daily Briefing Agent</strong>\nUses ReAct-style reasoning within LangGraph nodes. The \"research\" node reasons about which\nsource to query (arXiv vs Reddit vs Twitter), executes the tool call, observes the result,\nand decides if more queries are needed \u2014 all within a single node's execution.</span>\n<span class=\"paragraph\"><strong>Key lesson:</strong> I added a hard <code>max_loops=3</code> per topic. Without it, the agent was running\n10+ iterations and hallucinating tool calls \u2014 it would \"call\" tools it'd already used,\ngetting confused by the growing context. Bounded loops fixed it immediately.</span>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"My briefing agent uses a bounded ReAct pattern \u2014 max 3 reasoning loops per topic.\nWithout bounds, the loops were running 10+ iterations and hallucinating tool calls.\nThe bound is a hard engineering constraint, not a prompt instruction \u2014 the loop exits\nin code, not because the LLM decides to stop.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "262c0c05176e619bea423608be9f4636",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-2-tool-use-patterns\">Pattern 2: Tool Use Patterns</h2>\n<span class=\"paragraph\">Not all tool use is the same. The pattern you choose affects latency, cost, and debuggability.</span>\n<table>\n<thead>\n<tr>\n<th>Pattern</th>\n<th>Description</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Single tool call</strong></td>\n<td>LLM calls one tool, returns result</td>\n<td>Simple lookups, one-shot tasks</td>\n</tr>\n<tr>\n<td><strong>Parallel tool calls</strong></td>\n<td>LLM calls multiple tools simultaneously</td>\n<td>Independent sub-tasks \u2014 faster, no ordering dependency</td>\n</tr>\n<tr>\n<td><strong>Sequential tool calls</strong></td>\n<td>Each tool uses the previous tool's output</td>\n<td>When results depend on each other (ReAct is one form)</td>\n</tr>\n<tr>\n<td><strong>Structured outputs</strong></td>\n<td>Tool returns Pydantic-validated data</td>\n<td>Any time downstream code needs typed objects</td>\n</tr>\n<tr>\n<td><strong>Tool routing</strong></td>\n<td>Lightweight LLM classifies request, routes to specialized tool</td>\n<td>Cost optimization \u2014 not every query needs the full toolset</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"the-routing-insight\">The routing insight</h3>\n<span class=\"paragraph\">A small/cheap LLM classifier in front of your tools can dramatically reduce cost.\nThe classifier asks: \"which tool should handle this?\" \u2014 then the right tool is invoked\nwithout exposing your powerful (expensive) model to irrelevant context.</span>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"n\">User</span><span class=\"w\"> </span><span class=\"n\">query</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"n\">Classifier</span><span class=\"w\"> </span><span class=\"n\">LLM</span><span class=\"p\">]</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">route</span><span class=\"w\"> </span><span class=\"n\">to</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"n\">search</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"n\">calculator</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"n\">calendar</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"p\">...</span>\n<span class=\"w\">                </span><span class=\"p\">(</span><span class=\"n\">cheap</span><span class=\"p\">)</span><span class=\"w\">                          </span><span class=\"p\">(</span><span class=\"n\">specialized</span><span class=\"w\"> </span><span class=\"n\">tools</span><span class=\"p\">)</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "4d4ad7a3e78ed22c5370ae33eb3c4455",
+      "outputs": [
+        {
           "type": "error",
           "ename": "exception",
-          "evalue": "name 'mo' is not defined",
+          "evalue": "This event loop is already running",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "============================================================\n\n[Single Tool Call]\n  LLM decision: {\"tool\": \"search\", \"input\": \"What is LangGraph?\"}\n  Result: [search results for 'What is LangGraph?': 3 relevant documents found]\n\n[Sequential Tool Calls]\n  Step 1 (search): [search results for 'LangGraph architecture': 3 relevant documents found]\n  Step 2 (retrieve): [document doc_001: 'LangGraph enables stateful, multi-actor applications...']\n  Step 3 (summarize): [summary: '[document doc_001: 'LangGraph enables st...' condensed to 2 sentences]\n\n[Tool Routing]\n  Classifier \u2192 route: 'search'\n  Result: [search results for 'What is a StateGraph?': 3 relevant documents found]\n",
+          "mimetype": "text/plain"
+        },
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\PycharmProjects\\learning-log\\venv\\Lib\\site-packages\\marimo\\_runtime\\executor.py&quot;</span>, line <span class=\"m\">138</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Temp\\marimo_16656\\__marimo__cell_SFPL_.py&quot;</span>, line <span class=\"m\">90</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">parallel_result</span> <span class=\"o\">=</span> <span class=\"n\">asyncio</span><span class=\"o\">.</span><span class=\"n\">get_event_loop</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">run_until_complete</span><span class=\"p\">(</span>\n<span class=\"w\">                      </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\asyncio\\base_events.py&quot;</span>, line <span class=\"m\">629</span>, in <span class=\"n\">run_until_complete</span>\n<span class=\"w\">    </span><span class=\"bp\">self</span><span class=\"o\">.</span><span class=\"n\">_check_running</span><span class=\"p\">()</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\asyncio\\base_events.py&quot;</span>, line <span class=\"m\">588</span>, in <span class=\"n\">_check_running</span>\n<span class=\"w\">    </span><span class=\"k\">raise</span> <span class=\"ne\">RuntimeError</span><span class=\"p\">(</span><span class=\"s1\">&#39;This event loop is already running&#39;</span><span class=\"p\">)</span>\n<span class=\"gr\">RuntimeError</span>: <span class=\"n\">This event loop is already running</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "2a36c73af49f52900ec8477af765cfaa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-tool-use-patterns-in-practice\">My Projects \u2014 Tool Use Patterns in Practice</h3>\n<span class=\"paragraph\"><strong>Canopy (Job Search Agent)</strong>\nUses sequential tool calls \u2014 scrape job postings \u2192 score with LLM \u2192 structure with\nPydantic \u2192 route to Slack if <code>fit_score &gt; threshold</code>. Each step is a separately\ntestable function with a typed input/output contract.</span>\n<span class=\"paragraph\"><strong>Multi-agent-lab</strong>\nExperiments with parallel tool calls for research queries \u2014 running arXiv + Reddit +\nTwitter fetches simultaneously instead of sequentially. Latency dropped significantly\n(3 sequential API calls \u2192 1 parallel batch).</span>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"In Canopy, I made each tool call independently testable. The scraper, scorer, and\nnotifier are separate tools with Pydantic contracts between them. This makes the system\ndebuggable \u2014 if something breaks, I know exactly which tool. I added tool routing later\nwhen I realized not every job posting needed full LLM scoring \u2014 a keyword classifier\nhandles the obvious rejects cheaply first.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "16c69822e51eac45a993e1aab1b5f157",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-3-multi-agent-patterns\">Pattern 3: Multi-Agent Patterns</h2>\n<h3 id=\"when-one-agent-isnt-enough\">When one agent isn't enough</h3>\n<ul>\n<li>Task is too broad for one agent's context window</li>\n<li>Different sub-tasks need genuinely different expertise / prompts / tools</li>\n<li>Sub-tasks can run in parallel (different agents doing different things simultaneously)</li>\n<li>You want specialization: a researcher agent, a writer agent, a critic agent</li>\n</ul>\n<h3 id=\"four-main-patterns\">Four main patterns</h3>\n<table>\n<thead>\n<tr>\n<th>Pattern</th>\n<th>Structure</th>\n<th>Debuggability</th>\n<th>Flexibility</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Orchestrator-worker</strong></td>\n<td>Supervisor \u2192 specialists \u2192 aggregator</td>\n<td>High \u2014 one source of truth</td>\n<td>Medium</td>\n</tr>\n<tr>\n<td><strong>Sequential pipeline</strong></td>\n<td>Agent A \u2192 Agent B \u2192 Agent C</td>\n<td>High \u2014 fixed order</td>\n<td>Low</td>\n</tr>\n<tr>\n<td><strong>Hierarchical</strong></td>\n<td>Supervisor \u2192 mid-level supervisors \u2192 workers</td>\n<td>Medium</td>\n<td>Medium</td>\n</tr>\n<tr>\n<td><strong>Swarm / Peer-to-peer</strong></td>\n<td>Any agent can hand off to any other</td>\n<td>Low \u2014 distributed reasoning</td>\n<td>High</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">The trade-off is always <strong>debuggability vs flexibility</strong>.\nPeer-to-peer is the most flexible and the hardest to debug.\nSequential pipeline is the least flexible and the easiest to debug.</span>\n<span class=\"paragraph\"><strong>For production: default to orchestrator-worker.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "e1fe6bcf801f34da19c24bbfe76dd099",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"when-not-to-go-multi-agent\">When NOT to Go Multi-Agent</h3>\n<span class=\"paragraph\">Don't reach for multi-agent just because a task feels complex.\n<strong>A single agent with good tools often handles what looks like a multi-agent problem.</strong></span>\n<h4 id=\"multi-agent-failure-modes\">Multi-agent failure modes</h4>\n<table>\n<thead>\n<tr>\n<th>Failure mode</th>\n<th>Why it hurts</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Context loss at handoffs</strong></td>\n<td>Each agent has its own context window \u2014 what Agent A knew, Agent B doesn't</td>\n</tr>\n<tr>\n<td><strong>Coordination overhead</strong></td>\n<td>Agents talking to agents multiplies LLM calls and cost</td>\n</tr>\n<tr>\n<td><strong>Debugging nightmare</strong></td>\n<td>\"Whose reasoning was wrong?\" becomes genuinely hard to answer</td>\n</tr>\n<tr>\n<td><strong>Higher cost</strong></td>\n<td>Every agent boundary is another LLM call</td>\n</tr>\n</tbody>\n</table>\n<h4 id=\"use-multi-agent-when\">Use multi-agent when</h4>\n<ul>\n<li>Sub-tasks are genuinely parallel (different agents can work simultaneously)</li>\n<li>Sub-tasks need specialized context per role (a researcher needs different tools than a writer)</li>\n<li>A single agent's context window would overflow with the full task</li>\n<li>You need fault isolation \u2014 one agent failing shouldn't crash the whole pipeline</li>\n</ul>\n<hr />\n<span class=\"paragraph\"><strong>Interview gold:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"I default to single-agent workflows. I only reach for multi-agent when I can articulate\nspecifically WHY one agent won't work. Usually the answer is: the sub-tasks are genuinely\nparallel, or they need different tools/prompts. If I can't articulate the 'why', I don't\nadd the complexity.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "75dd8f49d28792354bee352139cf6781",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "This event loop is already running",
           "traceback": []
         }
       ],
@@ -20,123 +196,120 @@
         {
           "type": "stream",
           "name": "stderr",
-          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\PycharmProjects\\learning-log\\venv\\Lib\\site-packages\\marimo\\_runtime\\executor.py&quot;</span>, line <span class=\"m\">139</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"k\">return</span> <span class=\"nb\">eval</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">last_expr</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n<span class=\"w\">           </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Temp\\marimo_19680\\__marimo__cell_Hbol_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">md</span><span class=\"p\">(</span><span class=\"s2\">&quot;&quot;&quot;</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\PycharmProjects\\learning-log\\venv\\Lib\\site-packages\\marimo\\_runtime\\executor.py&quot;</span>, line <span class=\"m\">138</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Temp\\marimo_16656\\__marimo__cell_emfo_.py&quot;</span>, line <span class=\"m\">58</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">final_answer</span> <span class=\"o\">=</span> <span class=\"n\">asyncio</span><span class=\"o\">.</span><span class=\"n\">get_event_loop</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">run_until_complete</span><span class=\"p\">(</span>\n<span class=\"w\">                   </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\asyncio\\base_events.py&quot;</span>, line <span class=\"m\">629</span>, in <span class=\"n\">run_until_complete</span>\n<span class=\"w\">    </span><span class=\"bp\">self</span><span class=\"o\">.</span><span class=\"n\">_check_running</span><span class=\"p\">()</span>\n  File <span class=\"nb\">&quot;C:\\Users\\ukule\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\asyncio\\base_events.py&quot;</span>, line <span class=\"m\">588</span>, in <span class=\"n\">_check_running</span>\n<span class=\"w\">    </span><span class=\"k\">raise</span> <span class=\"ne\">RuntimeError</span><span class=\"p\">(</span><span class=\"s1\">&#39;This event loop is already running&#39;</span><span class=\"p\">)</span>\n<span class=\"gr\">RuntimeError</span>: <span class=\"n\">This event loop is already running</span>\n</pre></div>\n</span>",
           "mimetype": "application/vnd.marimo+traceback"
         }
       ]
     },
     {
-      "id": "MJUe",
-      "code_hash": "43bdef7b4216cfed5ba17172e7b92105",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "vblA",
-      "code_hash": "b55e5081841bfd06b64c3bf4c7a70141",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "bkHC",
-      "code_hash": "fc9856aac3e3542667bf1b7c4e3e5ee1",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "lEQa",
-      "code_hash": "28b2cd3a8aa4f343e6bd386d57d3a196",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "PKri",
-      "code_hash": "2377794ae546395b1fc96f242d6ddc82",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "Xref",
-      "code_hash": "262c0c05176e619bea423608be9f4636",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "SFPL",
-      "code_hash": "4d4ad7a3e78ed22c5370ae33eb3c4455",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "BYtC",
-      "code_hash": "2a36c73af49f52900ec8477af765cfaa",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "RGSE",
-      "code_hash": "16c69822e51eac45a993e1aab1b5f157",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "Kclp",
-      "code_hash": "e1fe6bcf801f34da19c24bbfe76dd099",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "emfo",
-      "code_hash": "75dd8f49d28792354bee352139cf6781",
-      "outputs": [],
-      "console": []
-    },
-    {
       "id": "Hstk",
       "code_hash": "e94fca0cad5662fe0615969b116c8f0b",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-multi-agent-in-practice\">My Projects \u2014 Multi-Agent in Practice</h3>\n<span class=\"paragraph\"><strong>Multi-agent-lab</strong>\nMy explicit playground for orchestrator-worker patterns. Built a research coordinator\nthat delegates to specialist agents (arXiv agent, Reddit agent, Twitter agent), each\nwith its own context and prompt. The orchestrator's reasoning is the single source of\ntruth \u2014 when something goes wrong, I look at the orchestrator trace first.</span>\n<span class=\"paragraph\"><strong>Daily Briefing Agent</strong>\nUses a <strong>sequential pipeline pattern</strong> within LangGraph: ingest node \u2192 filter node \u2192\nsummarize node \u2192 deliver node. Not multi-agent in the \"multiple LLMs reasoning\nsimultaneously\" sense, but multi-node with LLM calls at specific points. Each node is\nindependently testable.</span>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"My multi-agent-lab was built specifically to learn these patterns. Key lesson:\norchestrator-worker was dramatically better than peer-to-peer for debuggability.\nWhen a peer-to-peer agent misroutes a task, you have no clear trace of who decided what.\nWith orchestrator-worker, the orchestrator's reasoning is the single source of truth \u2014\nI can read its output and see exactly why it delegated to which worker.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "nWHF",
       "code_hash": "1898a0bb27b4b99fc7b875ac3f7f415e",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"pattern-4-langgraph\">Pattern 4: LangGraph</h2>\n<span class=\"paragraph\">LangGraph = graph-based agent framework where <strong>nodes</strong> are functions/LLM calls and\n<strong>edges</strong> define transitions between them.</span>\n<h3 id=\"key-primitives\">Key primitives</h3>\n<table>\n<thead>\n<tr>\n<th>Primitive</th>\n<th>What it is</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>StateGraph</strong></td>\n<td>Typed state (dict) that flows through the graph and is mutated at each node</td>\n</tr>\n<tr>\n<td><strong>Node</strong></td>\n<td>A Python function that takes state as input and returns a state update</td>\n</tr>\n<tr>\n<td><strong>Edge</strong></td>\n<td>A directed connection between two nodes \u2014 deterministic transition</td>\n</tr>\n<tr>\n<td><strong>Conditional edge</strong></td>\n<td>A function that inspects state and returns the next node name \u2014 branching</td>\n</tr>\n<tr>\n<td><strong>Compile</strong></td>\n<td>Turns the graph definition into an executable runnable</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"why-graphs-over-chains\">Why graphs over chains</h3>\n<ul>\n<li><strong>Explicit control flow</strong> \u2014 the graph IS the architecture diagram</li>\n<li><strong>Visualizable</strong> \u2014 export the graph as an image for stakeholders</li>\n<li><strong>Supports loops</strong> \u2014 a node can route back to an earlier node (retry, refinement)</li>\n<li><strong>Inspectable state</strong> \u2014 every node's input and output is a typed dict you can log</li>\n<li><strong>Human-in-the-loop</strong> \u2014 add approval nodes without changing the surrounding logic</li>\n</ul>\n<h3 id=\"langgraph-vs-simpler-frameworks\">LangGraph vs simpler frameworks</h3>\n<span class=\"paragraph\">Use LangGraph when you need:</span>\n<ul>\n<li><strong>Branching logic</strong> \u2014 \"if the LLM flagged uncertainty, route to a verification node\"</li>\n<li><strong>Loops with termination</strong> \u2014 retry failed steps with backoff, refinement cycles</li>\n<li><strong>Human approval steps</strong> \u2014 pause the graph, wait for a human, then continue</li>\n<li><strong>Visualization</strong> \u2014 show the workflow to a non-technical stakeholder</li>\n</ul>\n<span class=\"paragraph\">Use a simpler approach (direct LLM calls, basic Python state machine) when:</span>\n<ul>\n<li>The workflow is genuinely linear with no branching</li>\n<li>You need total control over every aspect and LangGraph's abstractions get in the way</li>\n</ul></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "iLit",
       "code_hash": "7f52ff655bc499b081a69e395782e16b",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "============================================================\nRun 1 \u2014 query that needs a tool call:\n\n[reasoning_node] query='What are LangGraph best practices?'\n  \u2192 action_needed=True\n[tool_node] executing tool for query='What are LangGraph best practices?'\n  \u2192 Tool result: found 3 documents relevant to 'What are LangGraph best practices?'\n[finalize_node]\n  \u2192 final_answer='Based on tool output \u2014 Tool result: found 3 documents relevant to 'What are LangGraph best practices?''\n\nFinal: Based on tool output \u2014 Tool result: found 3 documents relevant to 'What are LangGraph best practices?'\n\n============================================================\nRun 2 \u2014 query that goes directly to finalize:\n\n[reasoning_node] query='Hello'\n  \u2192 action_needed=False\n[finalize_node]\n  \u2192 final_answer='Direct answer to: 'Hello''\n\nFinal: Direct answer to: 'Hello'\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "ZHCJ",
       "code_hash": "5e1b145dcb599b5bc2e3cb438ef26bbd",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-langgraph-in-practice\">My Projects \u2014 LangGraph in Practice</h3>\n<span class=\"paragraph\"><strong>Daily Briefing Agent</strong>\nLangGraph with nodes for ingestion (arXiv/Reddit/Twitter), filtering, RAG retrieval\nfrom ChromaDB, LLM-powered summarization, and Slack delivery. Conditional edges handle:\n\"did we find anything new since yesterday?\" and \"is this content in-scope?\"\nThe graph structure means I can visualize the entire pipeline and show it to stakeholders.</span>\n<span class=\"paragraph\"><strong>Canopy (Job Search Agent)</strong>\nLangGraph agent where the state is the job search pipeline. Nodes handle scraping,\nenrichment, scoring, and notification. The graph makes it straightforward to add a\nhuman-in-the-loop approval step before posting to Slack \u2014 just add an approval node\nand a conditional edge. With a linear chain, this would require restructuring the whole flow.</span>\n<hr />\n<span class=\"paragraph\"><strong>Interview framing:</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"I chose LangGraph over LangChain's simpler Chain abstraction because my workflows\nhave branching (different behavior for different job categories) and loops (retry\nfailed scrapes with backoff). A linear chain can't express that cleanly. LangGraph\nlets me encode the control flow in the graph itself \u2014 the architecture IS the code.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "ROlb",
       "code_hash": "afb4788016e5ba7e560e2d702ce30701",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"debugging-and-observability-for-agents\">Debugging and Observability for Agents</h2>\n<span class=\"paragraph\">Agents are <strong>harder to debug than regular code</strong> \u2014 non-determinism, long traces,\nsubtle prompt issues, and failures that look like success until you read the trace carefully.</span>\n<h3 id=\"essential-practices\">Essential practices</h3>\n<table>\n<thead>\n<tr>\n<th>Practice</th>\n<th>Why it matters</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Log every LLM call</strong> (input, output, latency, cost)</td>\n<td>Know what was sent, what came back, how much it cost</td>\n</tr>\n<tr>\n<td><strong>Log every tool call and its result</strong></td>\n<td>Isolate whether the LLM or the tool caused a bad outcome</td>\n</tr>\n<tr>\n<td><strong>Version prompts alongside code</strong></td>\n<td>Prompts as <code>.txt</code> files in the repo, not inline strings</td>\n</tr>\n<tr>\n<td><strong>Replay capability</strong></td>\n<td>Given a saved trace, replay with mocked LLM responses \u2014 reproduce locally</td>\n</tr>\n<tr>\n<td><strong>Structured trace storage</strong></td>\n<td>JSONL per run \u2014 searchable, diffable, feedable to evals</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"tools\">Tools</h3>\n<ul>\n<li><strong>LangSmith</strong> \u2014 native LangGraph integration, trace visualization, prompt playground</li>\n<li><strong>Langfuse</strong> \u2014 open-source alternative, good for self-hosted setups</li>\n<li><strong>Custom JSONL traces</strong> \u2014 simple, always works, no external dependency</li>\n</ul>\n<h3 id=\"my-approach\">My approach</h3>\n<span class=\"paragraph\">My briefing agent logs every node's input/output to a JSONL file. When something\nweird happens in production, I can replay the trace locally with mocked LLM calls\nand inspect exactly what the agent saw at each step.</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"c1\"># Minimal structured logging pattern</span>\n<span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">json</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">pathlib</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">Path</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">datetime</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">datetime</span>\n\n<span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">log_node</span><span class=\"p\">(</span><span class=\"n\">node_name</span><span class=\"p\">:</span> <span class=\"nb\">str</span><span class=\"p\">,</span> <span class=\"n\">state_in</span><span class=\"p\">:</span> <span class=\"nb\">dict</span><span class=\"p\">,</span> <span class=\"n\">state_out</span><span class=\"p\">:</span> <span class=\"nb\">dict</span><span class=\"p\">):</span>\n    <span class=\"n\">entry</span> <span class=\"o\">=</span> <span class=\"p\">{</span>\n        <span class=\"s2\">&quot;ts&quot;</span><span class=\"p\">:</span> <span class=\"n\">datetime</span><span class=\"o\">.</span><span class=\"n\">utcnow</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">isoformat</span><span class=\"p\">(),</span>\n        <span class=\"s2\">&quot;node&quot;</span><span class=\"p\">:</span> <span class=\"n\">node_name</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;state_in&quot;</span><span class=\"p\">:</span> <span class=\"n\">state_in</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;state_out&quot;</span><span class=\"p\">:</span> <span class=\"n\">state_out</span><span class=\"p\">,</span>\n    <span class=\"p\">}</span>\n    <span class=\"k\">with</span> <span class=\"nb\">open</span><span class=\"p\">(</span><span class=\"s2\">&quot;agent_trace.jsonl&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;a&quot;</span><span class=\"p\">)</span> <span class=\"k\">as</span> <span class=\"n\">f</span><span class=\"p\">:</span>\n        <span class=\"n\">f</span><span class=\"o\">.</span><span class=\"n\">write</span><span class=\"p\">(</span><span class=\"n\">json</span><span class=\"o\">.</span><span class=\"n\">dumps</span><span class=\"p\">(</span><span class=\"n\">entry</span><span class=\"p\">)</span> <span class=\"o\">+</span> <span class=\"s2\">&quot;</span><span class=\"se\">\\n</span><span class=\"s2\">&quot;</span><span class=\"p\">)</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>The rule:</strong> if you can't replay it locally, you can't debug it in production.</span></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "qnkX",
       "code_hash": "739998ecab6a01111059c64bb27af81f",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"common-interviewer-questions\">Common Interviewer Questions</h2>\n<span class=\"paragraph\"><strong>\"When would you use an agent vs a fixed pipeline?\"</strong>\nFixed pipeline when the workflow is known and static \u2014 the path doesn't change based\non intermediate results. Agent when the path depends on intermediate results or user\ninput. Most production systems are somewhere in between: a workflow with agentic nodes\nat the decision points.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"How do you handle agent failures?\"</strong>\nBounded loops (max iterations in code, not prompts), fallback responses when tools fail,\nretry with exponential backoff for transient errors, observability at every step so I\nknow which node failed, and graceful degradation \u2014 if one tool fails, continue with others\nrather than crashing the whole pipeline.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"Have you built multi-agent systems? What did you learn?\"</strong>\nYes \u2014 multi-agent-lab. Key lesson: start single-agent, go multi-agent only when you have\na specific reason. Orchestrator-worker is dramatically better than peer-to-peer for\nproduction \u2014 the orchestrator's reasoning is the single source of truth when debugging.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"How do you evaluate agents?\"</strong>\nEnd-to-end task success rate, per-step evals (did tool selection match expected?), trace\nreview for qualitative assessment on edge cases, and regression evals on known-hard cases\nwhenever I change a prompt or tool definition.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"LangGraph vs building from scratch \u2014 when do you pick each?\"</strong>\nFor prototyping and well-understood patterns, LangGraph is excellent \u2014 the graph structure\ngives me visualization and branching for free. For truly custom flows or production systems\nwhere I need total control, I sometimes build lightweight state machines in pure Python.\nThe framework should match the complexity of the problem, not the other way around.</span></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "TqIu",
       "code_hash": "7cf6f224b2632488a7b960804bf805b8",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>Answer</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>What is ReAct?</strong></td>\n<td>Thought\u2192Action\u2192Observation loop; externalizes reasoning as text for an auditable trace</td>\n</tr>\n<tr>\n<td><strong>Single agent vs multi-agent?</strong></td>\n<td>Default to single. Go multi when sub-tasks are genuinely parallel or need specialized context.</td>\n</tr>\n<tr>\n<td><strong>Orchestrator-worker vs peer-to-peer?</strong></td>\n<td>Orchestrator-worker is more debuggable (one source of truth); peer-to-peer is more flexible. Pick orchestrator for production.</td>\n</tr>\n<tr>\n<td><strong>What's LangGraph's core abstraction?</strong></td>\n<td>Typed state passed between nodes via edges, with conditional branching encoded as Python functions</td>\n</tr>\n<tr>\n<td><strong>Why bound agent loops?</strong></td>\n<td>Without <code>max_iterations</code>, agents can loop indefinitely, hallucinate tool calls, or burn through tokens</td>\n</tr>\n<tr>\n<td><strong>Biggest debugging challenge with agents?</strong></td>\n<td>Non-determinism + long traces. Solution: structured logging of every LLM/tool call, replay capability.</td>\n</tr>\n<tr>\n<td><strong>When is multi-agent overkill?</strong></td>\n<td>When a single agent with good tools would work. Don't add complexity without a specific reason.</td>\n</tr>\n<tr>\n<td><strong>How do you version agent prompts?</strong></td>\n<td>Prompts as <code>.txt</code> files in the repo, under version control, with regression evals on prompt changes</td>\n</tr>\n<tr>\n<td><strong>Workflow vs agent (Anthropic's framing)?</strong></td>\n<td>Workflow = predefined paths; Agent = LLM-directed paths. Most production = workflow with agentic nodes.</td>\n</tr>\n<tr>\n<td><strong>Tool routing \u2014 why bother?</strong></td>\n<td>A cheap classifier LLM in front saves expensive model calls; only route queries to the tools that can handle them.</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "Vxnm",
       "code_hash": "5190210dc2206389036362a0221035d7",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<span class=\"paragraph\"><strong>\"Walk me through an agent you've built\"</strong>\nDaily Briefing Agent. LangGraph workflow with nodes for ingestion from arXiv/Reddit/Twitter,\nRAG retrieval from ChromaDB, LLM-powered summarization with tool calls, and conditional\ndelivery to Slack. Took 3 iterations to get the loop bounds right \u2014 first version had no\nmax-iteration cap and occasionally looped forever.</span>\n<hr />\n<span class=\"paragraph\"><strong>\"What surprised you when building agents?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"Bounded loops and structured outputs mattered WAY more than picking the right framework.\nMy first version had no max-iteration cap and the agent would occasionally loop forever.\nAdding a hard limit in code \u2014 not a prompt instruction \u2014 fixed it immediately. The lesson:\nreliability comes from engineering constraints, not hoping the LLM decides to stop.\"</span>\n</blockquote>\n<hr />\n<span class=\"paragraph\"><strong>\"Multi-agent vs single-agent \u2014 when do you reach for each?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"I built multi-agent-lab specifically to explore these patterns. My takeaway: most\nproduction use cases work fine as single-agent workflows with good tool design.\nMulti-agent shines when sub-tasks are genuinely parallel or need different context per role.\nIf I can't articulate a specific reason why one agent won't work, I don't add the complexity.\"</span>\n</blockquote>\n<hr />\n<span class=\"paragraph\"><strong>Connection to my other work</strong>\nMy backtesting engine uses a similar pattern to orchestrator-worker: a strategy coordinator\ndispatches to different strategy modules (mean reversion, momentum, pairs trading), each\nrunning independently, with results aggregated. Same pattern \u2014 different domain. The\norchestrator-worker pattern is more general than agents; it's a good answer to\n\"how do you decompose complex tasks?\" regardless of whether LLMs are involved.</span></span>"
+          }
+        }
+      ],
       "console": []
     }
   ]

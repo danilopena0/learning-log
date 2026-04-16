@@ -5,6 +5,13 @@ app = marimo.App(width="medium")
 
 
 @app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
+
+
+@app.cell
 def header(mo):
     mo.md("""
     # Agent Architectures
@@ -18,10 +25,6 @@ def header(mo):
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# WHAT IS AN AGENT?
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def what_is_an_agent(mo):
@@ -66,10 +69,6 @@ def what_is_an_agent(mo):
     return
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SHARED IMPORTS
-# ─────────────────────────────────────────────────────────────────────────────
-
 @app.cell
 def shared_imports():
     import asyncio
@@ -78,12 +77,9 @@ def shared_imports():
     import time
     from dataclasses import dataclass, field
     from typing import Any, Callable, Optional
-    return asyncio, json, re, time, dataclass, field, Any, Callable, Optional
 
+    return Callable, asyncio, dataclass, json, re
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PATTERN 1: ReAct
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def react_concept(mo):
@@ -122,7 +118,7 @@ def react_concept(mo):
 
 
 @app.cell
-def react_implementation(re):
+def react_implementation(Callable, re):
     # ── Minimal ReAct loop (~40 lines) ───────────────────────────────────────────
     # Mock LLM returns structured Thought/Action strings for a test query.
     # Parser extracts action name + input, dispatch table runs the tool,
@@ -196,7 +192,7 @@ def react_implementation(re):
         return "Max iterations reached — no final answer."
 
     result = run_react("What's the weather in the capital of France?")
-    return (result,)
+    return
 
 
 @app.cell
@@ -223,10 +219,6 @@ def react_projects(mo):
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PATTERN 2: TOOL USE PATTERNS
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def tool_use_concept(mo):
@@ -348,10 +340,10 @@ def tool_use_code(asyncio, json):
     tool_routing("What is a StateGraph?")
 
     # Parallel requires async — run via asyncio
-    parallel_result = asyncio.get_event_loop().run_until_complete(
+    parallel_result = asyncio.run(
         parallel_tool_calls("LangGraph overview")
     )
-    return (parallel_result,)
+    return
 
 
 @app.cell
@@ -380,10 +372,6 @@ def tool_use_projects(mo):
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PATTERN 3: MULTI-AGENT PATTERNS
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def multi_agent_concept(mo):
@@ -450,7 +438,7 @@ def multi_agent_when_not_to(mo):
 
 
 @app.cell
-def orchestrator_worker_code(asyncio, dataclass, field):
+def orchestrator_worker_code(asyncio, dataclass):
     # ── Orchestrator-worker pattern (~50 lines) ───────────────────────────────────
     # Orchestrator decomposes a research query into sub-queries,
     # dispatches each to a worker in parallel, aggregates results.
@@ -508,10 +496,10 @@ def orchestrator_worker_code(asyncio, dataclass, field):
         return final
 
     # Run the orchestrator-worker demo
-    final_answer = asyncio.get_event_loop().run_until_complete(
+    final_answer = asyncio.run(
         run_orchestrator_worker("LangGraph multi-agent patterns")
     )
-    return (final_answer,)
+    return
 
 
 @app.cell
@@ -542,10 +530,6 @@ def multi_agent_projects(mo):
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PATTERN 4: LANGGRAPH SPECIFICALLY
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def langgraph_concept(mo):
@@ -588,7 +572,7 @@ def langgraph_concept(mo):
 
 
 @app.cell
-def langgraph_example(dataclass, Callable):
+def langgraph_example(Callable):
     # ── Minimal LangGraph-style state machine (no langgraph install required) ─────
     # Mocks the core primitives: StateGraph, nodes, conditional edges.
     # Pattern underlying both the Briefing Agent and Canopy.
@@ -690,8 +674,7 @@ def langgraph_example(dataclass, Callable):
                           "tool_result": "", "final_answer": "", "step": 0}
     result2 = graph.run(state2)
     print(f"\nFinal: {result2['final_answer']}")
-
-    return (result1, result2)
+    return
 
 
 @app.cell
@@ -721,10 +704,6 @@ def langgraph_projects(mo):
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# DEBUGGING AND OBSERVABILITY
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def debugging_observability(mo):
@@ -769,17 +748,13 @@ def debugging_observability(mo):
             "state_out": state_out,
         }
         with open("agent_trace.jsonl", "a") as f:
-            f.write(json.dumps(entry) + "\\n")
+            f.write(json.dumps(entry) + "\n")
     ```
 
     **The rule:** if you can't replay it locally, you can't debug it in production.
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# COMMON INTERVIEWER QUESTIONS
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def interview_questions(mo):
@@ -826,10 +801,6 @@ def interview_questions(mo):
     return
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# FLASHCARD SUMMARY
-# ─────────────────────────────────────────────────────────────────────────────
-
 @app.cell
 def flashcard_summary(mo):
     mo.md("""
@@ -851,10 +822,6 @@ def flashcard_summary(mo):
     """)
     return
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# INTERVIEW TALKING POINTS
-# ─────────────────────────────────────────────────────────────────────────────
 
 @app.cell
 def interview_talking_points(mo):
