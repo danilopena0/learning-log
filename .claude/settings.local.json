@@ -5,7 +5,12 @@
       "Bash(python3:*)",
       "Bash(grep:*)",
       "Bash(ls .venv/bin/python*)",
-      "Bash(ls venv/bin/python*)"
+      "Bash(ls venv/bin/python*)",
+      "Bash(pip show *)",
+      "Bash(pip3 show *)",
+      "Bash(venv/Scripts/python.exe -c \"import langchain; print\\(langchain.__version__\\)\")",
+      "Bash(venv/Scripts/python.exe -c \"from langchain.text_splitter import RecursiveCharacterTextSplitter; print\\('langchain.text_splitter: ok'\\)\")",
+      "Bash(venv/Scripts/python.exe *)"
     ]
   }
 }

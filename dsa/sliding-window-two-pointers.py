@@ -138,7 +138,9 @@ def max_profit(prices: list[int]) -> int:
 
 @app.cell
 def buy_sell_visualization():
-    import matplotlib.pyplot as plt
+    import matplotlib as _matplotlib
+    _matplotlib.use("Agg")
+    import matplotlib.pyplot as _plt
 
     prices = [7, 1, 5, 3, 6, 4]
     days = list(range(len(prices)))
@@ -153,16 +155,16 @@ def buy_sell_visualization():
     buy_day, sell_day = 1, 4
     buy_price, sell_price = prices[buy_day], prices[sell_day]
 
-    fig, ax = plt.subplots(figsize=(8, 4))
-    fig.patch.set_facecolor("white")
-    ax.set_facecolor("white")
+    _fig, _ax = _plt.subplots(figsize=(8, 4))
+    _fig.patch.set_facecolor("white")
+    _ax.set_facecolor("white")
 
     # Price line
-    ax.plot(days, prices, color="#2c3e50", linewidth=2.5, marker="o",
+    _ax.plot(days, prices, color="#2c3e50", linewidth=2.5, marker="o",
             markersize=7, zorder=3, label="Price")
 
     # Shade profit region between buy and sell days
-    ax.fill_between(
+    _ax.fill_between(
         days[buy_day : sell_day + 1],
         prices[buy_day : sell_day + 1],
         buy_price,
@@ -171,11 +173,11 @@ def buy_sell_visualization():
     )
 
     # Dashed line tracking min_price_so_far (the "left pointer" state)
-    ax.step(days, running_min, where="post", color="#e67e22",
+    _ax.step(days, running_min, where="post", color="#e67e22",
             linestyle="--", linewidth=1.8, zorder=2, label="min_price_so_far")
 
     # Buy annotation — green arrow
-    ax.annotate(
+    _ax.annotate(
         f"BUY\n${buy_price}",
         xy=(buy_day, buy_price),
         xytext=(buy_day + 0.4, buy_price + 1.8),
@@ -184,7 +186,7 @@ def buy_sell_visualization():
     )
 
     # Sell annotation — red arrow
-    ax.annotate(
+    _ax.annotate(
         f"SELL\n${sell_price}",
         xy=(sell_day, sell_price),
         xytext=(sell_day - 1.2, sell_price + 1.2),
@@ -192,19 +194,19 @@ def buy_sell_visualization():
         color="#e74c3c", fontsize=9, fontweight="bold"
     )
 
-    ax.set_xticks(days)
-    ax.set_xticklabels([f"Day {d}" for d in days])
-    ax.set_ylabel("Price ($)")
-    ax.set_title(
+    _ax.set_xticks(days)
+    _ax.set_xticklabels([f"Day {d}" for d in days])
+    _ax.set_ylabel("Price ($)")
+    _ax.set_title(
         "LC #121 — Best Time to Buy and Sell Stock\n"
         "[7, 1, 5, 3, 6, 4]  →  profit = 5",
         fontsize=11
     )
-    ax.legend(loc="upper right", fontsize=8)
-    ax.grid(axis="y", alpha=0.3)
-    ax.set_ylim(0, 9.5)
-    plt.tight_layout()
-    return fig
+    _ax.legend(loc="upper right", fontsize=8)
+    _ax.grid(axis="y", alpha=0.3)
+    _ax.set_ylim(0, 9.5)
+    _fig.tight_layout()
+    return _fig
 
 
 @app.cell
@@ -325,7 +327,9 @@ def max_area(height: list[int]) -> int:
 
 @app.cell
 def container_visualization():
-    import matplotlib.pyplot as plt
+    import matplotlib as _matplotlib
+    _matplotlib.use("Agg")
+    import matplotlib.pyplot as _plt
 
     height = [1, 8, 6, 2, 5, 4, 8, 3, 7]
     n = len(height)
@@ -334,32 +338,32 @@ def container_visualization():
     left_opt, right_opt = 1, 8                                     # optimal pair
     water_level = min(height[left_opt], height[right_opt])         # 7
 
-    fig, ax = plt.subplots(figsize=(9, 5))
-    fig.patch.set_facecolor("white")
-    ax.set_facecolor("white")
+    _fig, _ax = _plt.subplots(figsize=(9, 5))
+    _fig.patch.set_facecolor("white")
+    _ax.set_facecolor("white")
 
     # All bars — gray by default, blue for the optimal pair
     bar_colors = ["#bdc3c7"] * n
     bar_colors[left_opt] = "#2980b9"
     bar_colors[right_opt] = "#2980b9"
 
-    ax.bar(indices, height, color=bar_colors, edgecolor="white",
+    _ax.bar(indices, height, color=bar_colors, edgecolor="white",
            linewidth=0.8, width=0.8, zorder=2)
 
     # Shade the water volume between the two optimal walls
     water_xs = [left_opt - 0.4, left_opt - 0.4, right_opt + 0.4, right_opt + 0.4]
     water_ys = [0, water_level, water_level, 0]
-    ax.fill(water_xs, water_ys, alpha=0.25, color="#3498db",
+    _ax.fill(water_xs, water_ys, alpha=0.25, color="#3498db",
             zorder=1, label="Water area")
 
     # Horizontal water-level line
-    ax.hlines(water_level, left_opt - 0.4, right_opt + 0.4,
+    _ax.hlines(water_level, left_opt - 0.4, right_opt + 0.4,
               colors="#3498db", linewidths=2.2, linestyles="--", zorder=3,
               label=f"Water level = min(8, 7) = {water_level}")
 
     # Central annotation
     mid_x = (left_opt + right_opt) / 2
-    ax.text(
+    _ax.text(
         mid_x, water_level / 2,
         f"width = {right_opt - left_opt}\nheight = min(8,7) = {water_level}\narea = 49",
         ha="center", va="center", fontsize=9, fontweight="bold", color="#1a5276",
@@ -368,24 +372,24 @@ def container_visualization():
     )
 
     # Label the optimal bars
-    ax.text(left_opt, height[left_opt] + 0.25, "L\nh=8",
+    _ax.text(left_opt, height[left_opt] + 0.25, "L\nh=8",
             ha="center", fontsize=8.5, color="#1a5276", fontweight="bold")
-    ax.text(right_opt, height[right_opt] + 0.25, "R\nh=7",
+    _ax.text(right_opt, height[right_opt] + 0.25, "R\nh=7",
             ha="center", fontsize=8.5, color="#1a5276", fontweight="bold")
 
-    ax.set_xticks(indices)
-    ax.set_xticklabels([f"i={i}\nh={h}" for i, h in zip(indices, height)])
-    ax.set_ylabel("Height")
-    ax.set_ylim(0, 11)
-    ax.set_title(
+    _ax.set_xticks(indices)
+    _ax.set_xticklabels([f"i={i}\nh={h}" for i, h in zip(indices, height)])
+    _ax.set_ylabel("Height")
+    _ax.set_ylim(0, 11)
+    _ax.set_title(
         "LC #11 — Container With Most Water\n"
         "[1, 8, 6, 2, 5, 4, 8, 3, 7]  →  area = 49",
         fontsize=11
     )
-    ax.legend(loc="upper left", fontsize=8)
-    ax.grid(axis="y", alpha=0.3)
-    plt.tight_layout()
-    return fig
+    _ax.legend(loc="upper left", fontsize=8)
+    _ax.grid(axis="y", alpha=0.3)
+    _fig.tight_layout()
+    return _fig
 
 
 @app.cell

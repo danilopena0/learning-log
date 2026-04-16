@@ -316,7 +316,7 @@ def _(lr_probs_test, mo, threshold_slider, y_test_pr):
 
     _fig.tight_layout()
 
-    mo.vstack([
+    return mo.vstack([
         mo.md(f"""
         ### Interactive Threshold Visualization
 
@@ -332,7 +332,6 @@ def _(lr_probs_test, mo, threshold_slider, y_test_pr):
         > **High threshold** = high precision, low recall (only flag when very confident, miss more fraud).
         """),
     ])
-    return
 
 
 @app.cell
