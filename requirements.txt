@@ -9,3 +9,5 @@ langchain
 langchain-text-splitters
 ragas
 bert-score
+rank-bm25
+hnswlib

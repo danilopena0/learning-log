@@ -1,0 +1,253 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "badb348f2215d3c5ded51139f335e723",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"cross-validation-data-leakage-trainvaltest-splits\">Cross-Validation, Data Leakage, Train/Val/Test Splits</h1>\n<span class=\"paragraph\"><strong>Common Mistakes That Fail Interviews</strong></span>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-15</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>ML Theory</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topics</td>\n<td>CV \u00b7 Leakage \u00b7 Train/Val/Test \u00b7 TimeSeriesSplit \u00b7 GroupKFold</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "b012e53c2e5a8ee12643244f438ecbaa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"why-this-topic-wins-interviews\">Why This Topic Wins Interviews</h2>\n<span class=\"paragraph\">Most candidates can fit a model. Few can validate it correctly.</span>\n<span class=\"paragraph\">Interviewers test this with traps: <em>\"Here's a dataset and a metric \u2014 train a model.\"</em>\nIf you don't ask about the split strategy, you've already lost. The asymmetry is brutal:</span>\n<ul>\n<li><strong>Catching leakage</strong> in an interview signals senior-level thinking.</li>\n<li><strong>Missing leakage</strong> signals junior \u2014 even if your model architecture is technically better.</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><strong>\"If your validation strategy is wrong, your model metrics are lies.\"</strong></span>\n</blockquote>\n<span class=\"paragraph\">This is high ROI to know cold. Nearly every DS/ML interview gotcha is about leakage or\nimproper splits. Fix those and you eliminate a whole class of failure modes.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "11807b1d07ec22302d1caf696a8ab73d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"train-val-test-the-three-way-split\">Train / Val / Test \u2014 The Three-Way Split</h2>\n<table>\n<thead>\n<tr>\n<th>Set</th>\n<th>Purpose</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Training</strong></td>\n<td>Model learns weights from this data</td>\n</tr>\n<tr>\n<td><strong>Validation</strong></td>\n<td>Model selection, hyperparameter tuning, early stopping. You optimize <em>against</em> this set.</td>\n</tr>\n<tr>\n<td><strong>Test</strong></td>\n<td>Held-out, untouched. Final unbiased estimate of generalization. Touch <strong>once</strong> at the end.</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Common ratios:</strong></span>\n<ul>\n<li>60/20/20 or 70/15/15 for medium datasets</li>\n<li>98/1/1 for huge datasets (1% of 100M is still 1M samples)</li>\n</ul>\n<h3 id=\"why-three-sets-not-two\">Why three sets, not two?</h3>\n<span class=\"paragraph\">If you tune hyperparameters using test set feedback \u2014 even implicitly \u2014 you've leaked the test\nset into model selection. Every decision about your model eats into the test set's independence.</span>\n<span class=\"paragraph\"><strong>Rule:</strong> every decision you make about your model = uses validation. Test set is for the final\nreport ONLY.</span>\n<span class=\"paragraph\"><strong>The cardinal sin:</strong> looking at test metrics, then \"fixing\" the model. Now your test set is\ncontaminated. You'll report a metric that's more optimistic than true generalization.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "6c1319e0a38fa1b9742a506104df1d51",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"cross-validation-when-you-dont-have-enough-data\">Cross-Validation \u2014 When You Don't Have Enough Data</h2>\n<span class=\"paragraph\">A single train/val split = one estimate of performance. It could be lucky or unlucky depending\non which 20% ended up in the validation set.</span>\n<span class=\"paragraph\"><strong>K-fold CV:</strong> split data into K equal folds. Train K times \u2014 each time one fold is validation,\nthe rest are training. Average the K scores.</span>\n<table>\n<thead>\n<tr>\n<th>Variant</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>K-Fold</strong> (K=5 or 10)</td>\n<td>Default. Higher K = more compute, less variance in the estimate.</td>\n</tr>\n<tr>\n<td><strong>Stratified K-Fold</strong></td>\n<td>Preserves class proportions in each fold. Essential for imbalanced data.</td>\n</tr>\n<tr>\n<td><strong>LOOCV</strong> (K=N)</td>\n<td>Very expensive, high variance. Rarely used in practice.</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"cv-vs-single-split\">CV vs single split</h3>\n<table>\n<thead>\n<tr>\n<th>Use CV when...</th>\n<th>Use single split when...</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Small dataset (&lt;10K rows)</td>\n<td>Large dataset (CV is expensive overkill)</td>\n</tr>\n<tr>\n<td>Need robust performance estimate</td>\n<td>Time-series data (CV breaks temporal order)</td>\n</tr>\n<tr>\n<td>Doing hyperparameter search</td>\n<td>Production model where you'll keep iterating</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "855aac9e1426656f884ea0836762e88f",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "635b4304991b6c3f5f6a1b56e0cdd8b8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"the-7-most-common-forms-of-data-leakage\">The 7 Most Common Forms of Data Leakage</h2>\n<span class=\"paragraph\"><strong>Data leakage</strong> = your model has access to information at training time that it\n<strong>won't have at inference time</strong>.</span>\n<span class=\"paragraph\">Symptom: model crushes validation/test, fails catastrophically in production.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"If your validation accuracy seems too good to be true, it probably is. Look for leakage.\"</em></span>\n</blockquote>\n<span class=\"paragraph\">The 7 types below cover ~90% of leakage bugs seen in real production ML systems and\nin DS/ML interviews. Know each one cold.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "7a5ffa5c55f493d95f012a9cb30c7580",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-1-target-leakage\">Leak 1: Target Leakage</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> a feature directly contains the target, or a near-perfect proxy for it.</span>\n<span class=\"paragraph\"><strong>Example:</strong> predicting customer churn, but one of your features is <code>days_since_account_closed</code>\n\u2014 a field only populated for <em>churned</em> customers. The model trivially learns: if this field is\nnon-null \u2192 churn. At inference time on active customers, the field is always null, so the model\nis useless.</span>\n<span class=\"paragraph\"><strong>Detection signals:</strong></span>\n<ul>\n<li>AUC suspiciously close to 1.0</li>\n<li>One feature has dominant importance \u2014 everything else is nearly zero</li>\n<li>Model degrades drastically on holdout or production</li>\n</ul>\n<span class=\"paragraph\"><strong>Fix:</strong> audit every feature. Ask <em>\"would this value be available BEFORE the event we're predicting?\"</em>\nApply the timeline test: draw a line at prediction time. Any feature that crosses that line is suspect.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "8fcc93241e5901b8550d1eab9dd1e666",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "eee1679e0e5cb66bc3c1aade6fcadb1d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-2-train-test-contamination-via-preprocessing\">Leak 2: Train-Test Contamination via Preprocessing</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> fitting a transformer (scaler, imputer, encoder, PCA) on the <strong>full dataset</strong>\nbefore splitting.</span>\n<span class=\"paragraph\"><strong>Why it leaks:</strong> the scaler's mean/std is computed using test data information. The model\nindirectly \"sees\" the test set through the scaling parameters. Same for imputers (using test\nset means to fill gaps) and encoders (vocabulary includes test-only classes).</span>\n<span class=\"paragraph\"><strong>The fix is simple:</strong> split first, then fit transformers on train only. Transform both\ntrain and test using the <em>train-derived</em> parameters.</span>\n<span class=\"paragraph\"><strong>Even simpler fix:</strong> use <code>sklearn.Pipeline</code> \u2014 it guarantees this automatically. The scaler's\n<code>fit</code> is called only on training data at each CV fold. <strong>This is THE reason Pipelines exist.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "17ea4d112ed00041862c42c4697df944",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "2fd209bed07302818e1a6398aa9689ef",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-3-temporal-leakage\">Leak 3: Temporal Leakage</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> randomly splitting time-series data, allowing future data into training.</span>\n<span class=\"paragraph\"><strong>Example:</strong> predicting Q4 sales. A random split might put some Q4 rows in train and some in\ntest. Your model trains on future Q4 patterns and then \"predicts\" them \u2014 trivially.</span>\n<span class=\"paragraph\"><strong>The insidious version:</strong> any feature derived from future aggregates (rolling means that\ninclude future rows, lag features computed incorrectly) leaks future into past.</span>\n<span class=\"paragraph\"><strong>Fix:</strong> use <code>sklearn.model_selection.TimeSeriesSplit</code>. Train on past, validate on future.\nAlways. No exceptions for time-ordered data.</span>\n<span class=\"paragraph\"><strong>Connection to backtesting:</strong> walk-forward validation IS TimeSeriesSplit applied to financial\ndata. Random splits in backtests produce spectacular-looking Sharpe ratios that collapse to\nzero in live trading. Same principle \u2014 train on past, test on future, never the reverse.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "729dcb7ae78d9101b85a3d29795b7c4b",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "f0848dbb7ac5d4c5b3164171207ecafd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-4-group-leakage\">Leak 4: Group Leakage</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> the same entity appears in both train and test (different rows, same underlying\ngroup).</span>\n<span class=\"paragraph\"><strong>Example:</strong> predicting whether a patient will get a disease. Patient A has 5 visits in the\ndataset \u2014 3 in train, 2 in test. The model memorizes Patient A's idiosyncratic patterns\n(their baseline vitals, their writing style in notes) and \"predicts\" them in test.</span>\n<span class=\"paragraph\">The key question: <strong>\"What is the unit of generalization?\"</strong> If you want to predict for a\n<em>new unseen patient</em>, all rows from Patient A must be entirely in train OR test \u2014 not both.</span>\n<span class=\"paragraph\"><strong>Detection:</strong> ask about every natural grouping: patient, user, customer, product, region,\ndocument, game session. If you'd predict for unseen entities of that type, you have groups.</span>\n<span class=\"paragraph\"><strong>Fix:</strong> <code>sklearn.model_selection.GroupKFold</code> or <code>GroupShuffleSplit</code>, passing <code>groups=patient_id</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "1df06f98ee9c4e19ceee83b22fc86797",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "c750a50c4cb1df38f7c0eab9a5db2269",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-5-look-ahead-in-features\">Leak 5: Look-Ahead in Features</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> a feature uses aggregated statistics that include the target row's own time period.</span>\n<span class=\"paragraph\"><strong>Example:</strong> <code>user_avg_purchase_amount_last_30_days</code> \u2014 if the window is computed including\nthe target transaction itself, the feature leaks the target's value into the feature vector.\nThe model sees a version of the label dressed up as a feature.</span>\n<span class=\"paragraph\">This is subtle and extremely common in production ML, especially at companies with large\nfeature stores or complex ETL pipelines.</span>\n<span class=\"paragraph\"><strong>Real-world example:</strong> predicting whether a user clicks an ad. A feature is\n<code>session_ctr_today</code> computed using all clicks in the session \u2014 but the target event IS one\nof those clicks. The model knows the answer before it makes the prediction.</span>\n<span class=\"paragraph\"><strong>Fix:</strong> compute features <strong>as-of</strong> the target timestamp. Exclude the target row from any\naggregation window. In feature stores, this is called a <strong>point-in-time join</strong> \u2014 each row\nretrieves feature values from a snapshot taken <em>before</em> its event timestamp.</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"c1\"># WRONG</span>\n<span class=\"n\">df</span><span class=\"p\">[</span><span class=\"s2\">&quot;avg_spend_30d&quot;</span><span class=\"p\">]</span> <span class=\"o\">=</span> <span class=\"n\">df</span><span class=\"o\">.</span><span class=\"n\">groupby</span><span class=\"p\">(</span><span class=\"s2\">&quot;user_id&quot;</span><span class=\"p\">)[</span><span class=\"s2\">&quot;amount&quot;</span><span class=\"p\">]</span><span class=\"o\">.</span><span class=\"n\">transform</span><span class=\"p\">(</span>\n    <span class=\"k\">lambda</span> <span class=\"n\">x</span><span class=\"p\">:</span> <span class=\"n\">x</span><span class=\"o\">.</span><span class=\"n\">rolling</span><span class=\"p\">(</span><span class=\"mi\">30</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">mean</span><span class=\"p\">()</span>  <span class=\"c1\"># includes current row</span>\n<span class=\"p\">)</span>\n\n<span class=\"c1\"># RIGHT \u2014 use shift(1) or explicit point-in-time exclusion</span>\n<span class=\"n\">df</span><span class=\"p\">[</span><span class=\"s2\">&quot;avg_spend_30d&quot;</span><span class=\"p\">]</span> <span class=\"o\">=</span> <span class=\"n\">df</span><span class=\"o\">.</span><span class=\"n\">groupby</span><span class=\"p\">(</span><span class=\"s2\">&quot;user_id&quot;</span><span class=\"p\">)[</span><span class=\"s2\">&quot;amount&quot;</span><span class=\"p\">]</span><span class=\"o\">.</span><span class=\"n\">transform</span><span class=\"p\">(</span>\n    <span class=\"k\">lambda</span> <span class=\"n\">x</span><span class=\"p\">:</span> <span class=\"n\">x</span><span class=\"o\">.</span><span class=\"n\">shift</span><span class=\"p\">(</span><span class=\"mi\">1</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">rolling</span><span class=\"p\">(</span><span class=\"mi\">30</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">mean</span><span class=\"p\">()</span>  <span class=\"c1\"># excludes current row</span>\n<span class=\"p\">)</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "ee410af0fa0ccb1fbf7092f22d88ed4c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-6-target-encoding-leakage\">Leak 6: Target Encoding Leakage</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> target encoding categorical features (replace each category with its mean\ntarget value) using the <strong>full dataset</strong> \u2014 including the row being encoded.</span>\n<span class=\"paragraph\"><strong>Why it leaks:</strong> each row's own target value influences its encoding. The model effectively\nsees a noisy version of the label as a feature. On small or high-cardinality categories this\nis especially damaging \u2014 the encoding becomes nearly the label itself.</span>\n<span class=\"paragraph\"><strong>Code pattern that causes this:</strong>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"c1\"># WRONG: computes mean using full dataset, including the row&#39;s own label</span>\n<span class=\"n\">df</span><span class=\"p\">[</span><span class=\"s2\">&quot;cat_encoded&quot;</span><span class=\"p\">]</span> <span class=\"o\">=</span> <span class=\"n\">df</span><span class=\"o\">.</span><span class=\"n\">groupby</span><span class=\"p\">(</span><span class=\"s2\">&quot;category&quot;</span><span class=\"p\">)[</span><span class=\"s2\">&quot;target&quot;</span><span class=\"p\">]</span><span class=\"o\">.</span><span class=\"n\">transform</span><span class=\"p\">(</span><span class=\"s2\">&quot;mean&quot;</span><span class=\"p\">)</span>\n<span class=\"n\">X_train</span> <span class=\"o\">=</span> <span class=\"n\">df</span><span class=\"p\">[</span><span class=\"n\">features</span><span class=\"p\">]</span>\n</code></pre></div></span>\n<span class=\"paragraph\"><strong>Fixes:</strong></span>\n<ol>\n<li><strong>Within-fold target encoding:</strong> compute target encoding using only training fold data.\n   Never let the encoding see validation fold labels.</li>\n<li><strong>Leave-one-out target encoding:</strong> when computing the encoding for row i, exclude row i\n   from the mean calculation. Reduces but doesn't eliminate leakage in CV.</li>\n<li><strong>sklearn's <code>TargetEncoder</code></strong> (sklearn \u2265 1.3) handles this correctly when used inside a\n   <code>Pipeline</code> with CV \u2014 it fits encoding only on the training portion.</li>\n</ol>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"c1\"># RIGHT: use Pipeline so TargetEncoder only sees training fold labels at each CV split</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">sklearn.preprocessing</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">TargetEncoder</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">sklearn.pipeline</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">Pipeline</span>\n\n<span class=\"n\">pipe</span> <span class=\"o\">=</span> <span class=\"n\">Pipeline</span><span class=\"p\">([</span>\n    <span class=\"p\">(</span><span class=\"s2\">&quot;enc&quot;</span><span class=\"p\">,</span> <span class=\"n\">TargetEncoder</span><span class=\"p\">(</span><span class=\"n\">target_type</span><span class=\"o\">=</span><span class=\"s2\">&quot;binary&quot;</span><span class=\"p\">)),</span>\n    <span class=\"p\">(</span><span class=\"s2\">&quot;clf&quot;</span><span class=\"p\">,</span> <span class=\"n\">LogisticRegression</span><span class=\"p\">()),</span>\n<span class=\"p\">])</span>\n<span class=\"n\">cross_val_score</span><span class=\"p\">(</span><span class=\"n\">pipe</span><span class=\"p\">,</span> <span class=\"n\">X</span><span class=\"p\">,</span> <span class=\"n\">y</span><span class=\"p\">,</span> <span class=\"n\">cv</span><span class=\"o\">=</span><span class=\"n\">StratifiedKFold</span><span class=\"p\">(</span><span class=\"mi\">5</span><span class=\"p\">))</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "ad9dd3e2823cbc61c07b1b1b08abdc14",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"leak-7-eval-set-drift-repeated-evaluation\">Leak 7: Eval Set Drift / Repeated Evaluation</h3>\n<span class=\"paragraph\"><strong>Definition:</strong> looking at test metrics repeatedly during development effectively turns your\ntest set into a validation set. Each peek leaks information into your decisions.</span>\n<span class=\"paragraph\"><strong>How it happens:</strong> you train model v1, check test AUC \u2192 0.78. Train v2 with more features,\ncheck test AUC \u2192 0.81. Try v3 with different hyperparams, test AUC \u2192 0.79. Keep v2. You've\nnow done model selection on the test set.</span>\n<span class=\"paragraph\"><strong>Why it's insidious:</strong> you never explicitly used the test set in training. But every time\nyou looked at its metric and made a decision based on it, you were effectively selecting\nfor models that happen to fit the test set. The reported metric is biased upward.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"If you've made 10 model versions and looked at test performance for each, you've selected\na model that fits the test set. The reported metric is not an unbiased estimate of\ngeneralization.\"</em></span>\n</blockquote>\n<span class=\"paragraph\"><strong>Fixes:</strong></span>\n<ol>\n<li><strong>Discipline:</strong> test set = ONE evaluation at the very end. Use validation for all iteration.</li>\n<li><strong>Hold out a second test set</strong> from the start if you need early sanity checks.</li>\n<li><strong>Track decisions:</strong> log every time you look at the test set. If the count &gt; 1, your metric\n   is suspect.</li>\n<li><strong>Statistical correction:</strong> Bonferroni or train-test protocol to adjust for multiple\n   comparisons \u2014 but discipline is simpler and more reliable.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "f183bfa69af01e21a49cdd565a8b28a4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"special-cases-validation-strategies-for-tricky-data\">Special Cases \u2014 Validation Strategies for Tricky Data</h2>\n<h3 id=\"time-series-data\">Time-Series Data</h3>\n<span class=\"paragraph\">Never random split. Always temporal split.</span>\n<table>\n<thead>\n<tr>\n<th>Strategy</th>\n<th>Description</th>\n<th>Use when</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>TimeSeriesSplit</strong></td>\n<td>Walk-forward: train on [t0, t1], test [t1, t2], expand each fold</td>\n<td>Standard time-series CV</td>\n</tr>\n<tr>\n<td><strong>Expanding window</strong></td>\n<td>Training window grows each fold \u2014 most realistic for production</td>\n<td>Non-stationary data with long-range dependencies</td>\n</tr>\n<tr>\n<td><strong>Sliding window</strong></td>\n<td>Fixed-size training window slides forward</td>\n<td>Non-stationary where old data is irrelevant</td>\n</tr>\n<tr>\n<td><strong>Gap parameter</strong></td>\n<td>Leave a gap between train end and test start</td>\n<td>Simulate prediction lag (e.g., predict T+7 using data through T)</td>\n</tr>\n</tbody>\n</table>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">sklearn.model_selection</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">TimeSeriesSplit</span>\n<span class=\"n\">tscv</span> <span class=\"o\">=</span> <span class=\"n\">TimeSeriesSplit</span><span class=\"p\">(</span><span class=\"n\">n_splits</span><span class=\"o\">=</span><span class=\"mi\">5</span><span class=\"p\">,</span> <span class=\"n\">gap</span><span class=\"o\">=</span><span class=\"mi\">7</span><span class=\"p\">)</span>  <span class=\"c1\"># 7-step gap between train and test</span>\n</code></pre></div>\n<hr />\n<h3 id=\"imbalanced-classes\">Imbalanced Classes</h3>\n<ul>\n<li>Always use <code>StratifiedKFold</code> \u2014 preserves class proportions in each fold</li>\n<li>Without stratification: rare class might be entirely absent from a fold, making the\n  fold's metric meaningless</li>\n<li>For multi-label: <code>sklearn</code> doesn't support this natively \u2014 use <code>scikit-multilearn</code>'s\n  iterative stratification</li>\n</ul>\n<hr />\n<h3 id=\"grouped-data\">Grouped Data</h3>\n<span class=\"paragraph\">Detect groups by asking: <em>\"What entity am I ultimately predicting for?\"</em>\nIf the answer is a type of entity (patient, user, region) rather than a row, you have groups.</span>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Splitter</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Groups only</td>\n<td><code>GroupKFold</code> or <code>GroupShuffleSplit</code></td>\n</tr>\n<tr>\n<td>Groups + imbalanced</td>\n<td><code>StratifiedGroupKFold</code></td>\n</tr>\n<tr>\n<td>One group per fold</td>\n<td><code>LeaveOneGroupOut</code></td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h3 id=\"nested-cv-when-hyperparameter-search-matters\">Nested CV \u2014 When Hyperparameter Search Matters</h3>\n<span class=\"paragraph\"><strong>The problem:</strong> tuning hyperparameters on K-fold CV inflates the reported score.\nYou're optimizing against validation folds \u2014 they become contaminated by your tuning choices.</span>\n<span class=\"paragraph\"><strong>Solution:</strong> nested CV</span>\n<ul>\n<li><strong>Outer loop</strong> (5 folds): estimates true performance on held-out data</li>\n<li><strong>Inner loop</strong> (3 folds): tunes hyperparameters using only the outer training portion</li>\n</ul>\n<span class=\"paragraph\"><strong>Expensive but correct.</strong> Use when reporting performance for a paper or a high-stakes decision.</span>\n<span class=\"paragraph\"><strong>Production shortcut:</strong> skip nested CV. Use a single train/val/test split with grid search\non the validation set. Less rigorous, but faster and usually sufficient.</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">sklearn.model_selection</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">cross_val_score</span><span class=\"p\">,</span> <span class=\"n\">GridSearchCV</span>\n\n<span class=\"n\">inner_cv</span> <span class=\"o\">=</span> <span class=\"n\">StratifiedKFold</span><span class=\"p\">(</span><span class=\"n\">n_splits</span><span class=\"o\">=</span><span class=\"mi\">3</span><span class=\"p\">)</span>\n<span class=\"n\">outer_cv</span> <span class=\"o\">=</span> <span class=\"n\">StratifiedKFold</span><span class=\"p\">(</span><span class=\"n\">n_splits</span><span class=\"o\">=</span><span class=\"mi\">5</span><span class=\"p\">)</span>\n\n<span class=\"n\">gs</span> <span class=\"o\">=</span> <span class=\"n\">GridSearchCV</span><span class=\"p\">(</span><span class=\"n\">estimator</span><span class=\"o\">=</span><span class=\"n\">model</span><span class=\"p\">,</span> <span class=\"n\">param_grid</span><span class=\"o\">=</span><span class=\"n\">params</span><span class=\"p\">,</span> <span class=\"n\">cv</span><span class=\"o\">=</span><span class=\"n\">inner_cv</span><span class=\"p\">)</span>\n<span class=\"n\">nested_scores</span> <span class=\"o\">=</span> <span class=\"n\">cross_val_score</span><span class=\"p\">(</span><span class=\"n\">gs</span><span class=\"p\">,</span> <span class=\"n\">X</span><span class=\"p\">,</span> <span class=\"n\">y</span><span class=\"p\">,</span> <span class=\"n\">cv</span><span class=\"o\">=</span><span class=\"n\">outer_cv</span><span class=\"p\">)</span>  <span class=\"c1\"># outer loop</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "8938f053a96509fb1c537fc4e712e5d3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"decision-framework-which-validation-strategy\">Decision Framework \u2014 Which Validation Strategy?</h2>\n<div class=\"language-verilog codehilite\"><pre><span></span><code><span class=\"n\">Is</span><span class=\"w\"> </span><span class=\"n\">this</span><span class=\"w\"> </span><span class=\"kt\">time</span><span class=\"o\">-</span><span class=\"n\">series</span><span class=\"w\"> </span><span class=\"n\">data</span><span class=\"o\">?</span>\n<span class=\"err\">\u251c\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">YES</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">TimeSeriesSplit</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">with</span><span class=\"w\"> </span><span class=\"n\">gap</span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"k\">if</span><span class=\"w\"> </span><span class=\"n\">prediction</span><span class=\"w\"> </span><span class=\"n\">lag</span><span class=\"w\"> </span><span class=\"n\">exists</span><span class=\"p\">)</span>\n<span class=\"err\">\u2514\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">NO</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">Continue</span>\n\n<span class=\"n\">Are</span><span class=\"w\"> </span><span class=\"n\">there</span><span class=\"w\"> </span><span class=\"n\">natural</span><span class=\"w\"> </span><span class=\"n\">groups</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">patients</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">users</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">geographic</span><span class=\"w\"> </span><span class=\"n\">regions</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">etc</span><span class=\"p\">.)</span><span class=\"o\">?</span>\n<span class=\"err\">\u251c\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">YES</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">GroupKFold</span><span class=\"w\"> </span><span class=\"k\">or</span><span class=\"w\"> </span><span class=\"n\">StratifiedGroupKFold</span>\n<span class=\"err\">\u2514\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">NO</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">Continue</span>\n\n<span class=\"n\">Is</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">target</span><span class=\"w\"> </span><span class=\"n\">imbalanced</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">minority</span><span class=\"w\"> </span><span class=\"n\">class</span><span class=\"w\"> </span><span class=\"o\">&lt;</span><span class=\"w\"> </span><span class=\"mh\">10</span><span class=\"o\">-</span><span class=\"mh\">15</span><span class=\"o\">%</span><span class=\"p\">)</span><span class=\"o\">?</span>\n<span class=\"err\">\u251c\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">YES</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">StratifiedKFold</span>\n<span class=\"err\">\u2514\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">NO</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">KFold</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">regular</span><span class=\"p\">)</span>\n\n<span class=\"n\">Are</span><span class=\"w\"> </span><span class=\"n\">you</span><span class=\"w\"> </span><span class=\"n\">tuning</span><span class=\"w\"> </span><span class=\"n\">hyperparameters</span><span class=\"w\"> </span><span class=\"n\">AND</span><span class=\"w\"> </span><span class=\"n\">need</span><span class=\"w\"> </span><span class=\"n\">an</span><span class=\"w\"> </span><span class=\"n\">unbiased</span><span class=\"w\"> </span><span class=\"n\">performance</span><span class=\"w\"> </span><span class=\"n\">report</span><span class=\"o\">?</span>\n<span class=\"err\">\u251c\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">YES</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">Nested</span><span class=\"w\"> </span><span class=\"n\">CV</span><span class=\"w\">  </span><span class=\"p\">(</span><span class=\"k\">or</span><span class=\"w\"> </span><span class=\"n\">train</span><span class=\"o\">/</span><span class=\"n\">val</span><span class=\"o\">/</span><span class=\"n\">test</span><span class=\"w\"> </span><span class=\"n\">with</span><span class=\"w\"> </span><span class=\"n\">single</span><span class=\"w\"> </span><span class=\"n\">test</span><span class=\"w\"> </span><span class=\"n\">eval</span><span class=\"w\"> </span><span class=\"n\">at</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">very</span><span class=\"w\"> </span><span class=\"k\">end</span><span class=\"p\">)</span>\n<span class=\"err\">\u2514\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">NO</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">Standard</span><span class=\"w\"> </span><span class=\"n\">K</span><span class=\"o\">-</span><span class=\"n\">fold</span><span class=\"w\"> </span><span class=\"n\">is</span><span class=\"w\"> </span><span class=\"n\">fine</span>\n\n<span class=\"n\">Is</span><span class=\"w\"> </span><span class=\"n\">your</span><span class=\"w\"> </span><span class=\"n\">dataset</span><span class=\"w\"> </span><span class=\"k\">large</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"o\">&gt;</span><span class=\"mh\">100</span><span class=\"n\">K</span><span class=\"w\"> </span><span class=\"n\">rows</span><span class=\"p\">)</span><span class=\"o\">?</span>\n<span class=\"err\">\u251c\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">YES</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">Single</span><span class=\"w\"> </span><span class=\"n\">train</span><span class=\"o\">/</span><span class=\"n\">val</span><span class=\"o\">/</span><span class=\"n\">test</span><span class=\"w\"> </span><span class=\"n\">split</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">CV</span><span class=\"w\"> </span><span class=\"n\">is</span><span class=\"w\"> </span><span class=\"n\">expensive</span><span class=\"w\"> </span><span class=\"n\">overkill</span><span class=\"p\">)</span>\n<span class=\"err\">\u2514\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">NO</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">CV</span><span class=\"w\"> </span><span class=\"n\">recommended</span><span class=\"w\"> </span><span class=\"k\">for</span><span class=\"w\"> </span><span class=\"n\">stability</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>Checklist before training any model:</strong></span>\n<ol>\n<li>What is the unit of generalization? (row? patient? time period?)</li>\n<li>Is there temporal structure?</li>\n<li>Is there group structure?</li>\n<li>Is the target imbalanced?</li>\n<li>Have I split BEFORE fitting any transformers?</li>\n<li>Would any feature be unavailable at inference time?</li>\n<li>Have I touched the test set zero times so far?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "630dc58f1c95a6390cb8f80d3a370352",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>Answer</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Why three sets, not two?</td>\n<td>If you tune on test, test = validation \u2014 you have no unbiased estimate of generalization.</td>\n</tr>\n<tr>\n<td>When does single split fail?</td>\n<td>Small datasets: the random split could be lucky or unlucky. Use CV for stability.</td>\n</tr>\n<tr>\n<td>What's stratified K-fold?</td>\n<td>Preserves class proportions in each fold. Essential for imbalanced data.</td>\n</tr>\n<tr>\n<td>Time series + random split = ?</td>\n<td>Temporal leakage. Future data leaks into training. Use <code>TimeSeriesSplit</code>.</td>\n</tr>\n<tr>\n<td>Same patient in train and test = ?</td>\n<td>Group leakage. The model memorizes patient idiosyncrasies. Use <code>GroupKFold</code>.</td>\n</tr>\n<tr>\n<td>Scale before split or after?</td>\n<td><strong>After.</strong> Fit scaler on train only, transform both train and test with those params.</td>\n</tr>\n<tr>\n<td>What's target leakage?</td>\n<td>A feature contains the target or a near-perfect proxy. Symptoms: AUC \u2248 1.0, dominant feature importance.</td>\n</tr>\n<tr>\n<td>Why use sklearn Pipelines?</td>\n<td>They prevent preprocessing leakage by fitting transformers only on the training portion at each CV fold.</td>\n</tr>\n<tr>\n<td>Look-ahead in features?</td>\n<td>Feature uses information from the target's own time period. Fix: compute features as-of, use point-in-time joins.</td>\n</tr>\n<tr>\n<td>Why is repeated test set eval bad?</td>\n<td>Each look leaks info into your decisions. You end up selecting a model that fits the test set.</td>\n</tr>\n<tr>\n<td>What's nested CV for?</td>\n<td>Unbiased performance estimate when you're also tuning hyperparameters. Outer loop = eval, inner loop = tuning.</td>\n</tr>\n<tr>\n<td>Leave-one-out CV \u2014 when to use?</td>\n<td>Almost never. Very expensive, high variance estimate. K=5 or 10 is almost always better.</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "44e915166abc18c7cd57aa4c8a1f6337",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<hr />\n<h3 id=\"walk-me-through-your-validation-strategy\">\"Walk me through your validation strategy.\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"First I ask about the data: is it time-series? Are there natural groups \u2014 patients, users,\nregions? Is the target imbalanced? Based on that I pick the appropriate splitter:\n<code>TimeSeriesSplit</code> for temporal data, <code>GroupKFold</code> for grouped, <code>StratifiedKFold</code> for imbalanced.\nThen I use a three-way split: training for fitting, validation for model selection and\nhyperparameter tuning, test set touched exactly once for the final unbiased metric. Every\ntransformer \u2014 scalers, encoders, imputers \u2014 is fit only on the training portion, never on\nthe full dataset.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"tell-me-about-a-time-you-found-data-leakage\">\"Tell me about a time you found data leakage.\"</h3>\n<span class=\"paragraph\">Pick one of the 7 types. Tell a specific story \u2014 even a synthetic one. Vague = untrustworthy.</span>\n<blockquote>\n<span class=\"paragraph\">\"I was building a churn model and noticed the AUC was 0.98. I looked at feature importances\nand one feature \u2014 <code>days_since_account_closed</code> \u2014 had 85% importance. I realized that field\nwas only populated for churned customers, so it was a direct proxy for the label. After\nremoving it, AUC dropped to 0.72, which was the honest number. The model was actually useful\nfor the remaining signal \u2014 we just needed to be honest about what it could do.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"how-do-you-know-your-model-will-work-in-production\">\"How do you know your model will work in production?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Proper validation that matches production conditions. If we're predicting future events,\nI use a temporal split \u2014 train on past, validate on a forward-looking window. If we're\npredicting for unseen entities (new customers, new products), I use group-aware splits.\nI also make sure no preprocessing transformer sees test data during training. After all\nthat, I'd want shadow mode deployment \u2014 run the model in parallel with the current system,\ncompare predictions to actuals, before rolling out fully.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"why-might-val-accuracy-be-way-higher-than-test-accuracy\">\"Why might val accuracy be way higher than test accuracy?\"</h3>\n<span class=\"paragraph\">Three causes:</span>\n<ol>\n<li><strong>Repeated tuning against val:</strong> the validation set got contaminated \u2014 you optimized toward it.</li>\n<li><strong>Distribution shift:</strong> val and test came from different time periods or populations.</li>\n<li><strong>Data leakage present in val but not in test:</strong> a leaky feature exists in your val window\n   but the test window doesn't have it (e.g., a temporal leak).</li>\n</ol>\n<hr />\n<h3 id=\"connection-to-backtesting-my-work\">Connection to backtesting / my work</h3>\n<blockquote>\n<span class=\"paragraph\">\"My backtesting engine enforces walk-forward validation for trading strategies. Random\nshuffling of financial data produces spectacular-looking Sharpe ratios that collapse to zero\nin live trading \u2014 the model has seen the future. Walk-forward = TimeSeriesSplit applied to\nfinancial data: train on everything up to date T, test on T+1 through T+N, roll forward.\nThis is exactly why walk-forward backtests are considered honest and random-split backtests\nare not. Same principle, different domain.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
