@@ -10,7 +10,10 @@
       "Bash(pip3 show *)",
       "Bash(venv/Scripts/python.exe -c \"import langchain; print\\(langchain.__version__\\)\")",
       "Bash(venv/Scripts/python.exe -c \"from langchain.text_splitter import RecursiveCharacterTextSplitter; print\\('langchain.text_splitter: ok'\\)\")",
-      "Bash(venv/Scripts/python.exe *)"
+      "Bash(venv/Scripts/python.exe *)",
+      "Read(//usr/bin/**)",
+      "Read(//home/ukule/.local/bin/**)",
+      "Bash(./venv/Scripts/python.exe *)"
     ]
   }
 }
