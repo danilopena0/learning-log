@@ -1,0 +1,257 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "05e785a09ccbe2e68d818bd78387a02d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"tree-models-decision-trees-random-forests-xgboost-when-to-use-what-feature-importance\">Tree Models \u2014 Decision Trees, Random Forests, XGBoost. When to Use What. Feature Importance.</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-09</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>ML Theory</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topics</td>\n<td>Decision Trees \u00b7 Random Forests \u00b7 Gradient Boosting \u00b7 XGBoost \u00b7 Feature Importance</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "478a5ac35f11e05f7e1f0b6a96f9df50",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"why-trees-dominate-tabular-data\">Why Trees Dominate Tabular Data</h2>\n<span class=\"paragraph\">In 2025, <strong>gradient boosted trees</strong> (XGBoost, LightGBM, CatBoost) are <em>still</em> the best\ndefault for tabular data \u2014 despite a decade of deep learning advances. The reasons are structural:</span>\n<ul>\n<li><strong>Handle mixed feature types natively</strong> \u2014 trees split on thresholds, so numeric and categorical\n  features coexist without normalization or encoding</li>\n<li><strong>Capture nonlinear relationships and interactions automatically</strong> \u2014 every split is a conditional;\n  every branch adds an interaction term. Deep trees build high-order interactions for free.</li>\n<li><strong>Robust to feature scaling</strong> \u2014 no gradient magnitudes to balance; just threshold comparisons</li>\n<li><strong>Fast to train and serve</strong> \u2014 XGBoost on 1M rows in seconds; inference is a single tree traversal</li>\n<li><strong>Built-in feature importance</strong> \u2014 which features actually drive predictions?</li>\n</ul>\n<span class=\"paragraph\"><strong>When deep learning wins instead:</strong> images, text, audio, sequences, very large datasets\n(100M+ rows), tasks that require <em>learning representations</em> from raw unstructured inputs.</span>\n<span class=\"paragraph\"><strong>Interview framing:</strong> <em>\"For tabular data, my first model is always XGBoost or LightGBM.\nI'd need a strong reason to reach for a neural net \u2014 and 'deep learning is fancier' isn't one.\"</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "8f79f1d118b8b296c361840ec1a4b48f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-1-decision-trees-the-building-block\">Part 1: Decision Trees \u2014 The Building Block</h2>\n<span class=\"paragraph\">A decision tree <strong>recursively splits the feature space</strong> into rectangular regions, assigning\na prediction (majority class or mean) to each leaf.</span>\n<h3 id=\"how-it-decides-where-to-split\">How it decides where to split</h3>\n<span class=\"paragraph\">At each node, search over all features and thresholds to find the split that maximizes\n<strong>information gain</strong> (classification) or minimizes <strong>variance</strong> (regression).</span>\n<span class=\"paragraph\"><strong>Gini impurity</strong> \u2014 how \"mixed\" are the classes in this node?</span>\n<blockquote>\n<span class=\"paragraph\">Gini = 1 \u2212 \u03a3 p\u1d62\u00b2\nPure node \u2192 0.  Max impurity (binary, 50/50) \u2192 0.5.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>Entropy / Information Gain</strong> \u2014 measures disorder, then maximizes the <em>drop</em>:</span>\n<blockquote>\n<span class=\"paragraph\">Entropy = \u2212\u03a3 p\u1d62 log\u2082(p\u1d62)</span>\n</blockquote>\n<span class=\"paragraph\"><strong>Variance reduction (regression)</strong> \u2014 minimize MSE within each child node.</span>\n<span class=\"paragraph\"><strong>Gini vs Entropy:</strong> results are nearly identical in practice. Gini is slightly faster\n(no logarithm). Most libraries default to Gini.</span>\n<h3 id=\"when-to-stop-splitting\">When to stop splitting</h3>\n<span class=\"paragraph\"><code>max_depth</code>, <code>min_samples_leaf</code>, <code>min_impurity_decrease</code>. Without stopping criteria,\nthe tree memorizes every training sample \u2014 perfect train accuracy, terrible generalization.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "7a6e9a281fff6db9b9451f5c1c81cdef",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "2e919b219f48c8ec505e9e6c604a6c6a",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "2613c8d6bfbb15ab67589ecef269613b",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "e297a696c9e87e92c672ea6fe4072b06",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><blockquote>\n<span class=\"paragraph\"><strong>A single deep tree memorizes noise.</strong> The unlimited-depth tree above reaches ~100% train\naccuracy but performs worse on the test set \u2014 it has memorized labels, not learned the\npattern. This is the fundamental problem that random forests and boosting solve.</span>\n</blockquote>\n<h3 id=\"decision-tree-strengths-and-weaknesses\">Decision Tree: Strengths and Weaknesses</h3>\n<span class=\"paragraph\"><strong>Strengths:</strong></span>\n<ul>\n<li><strong>Fully interpretable</strong> \u2014 trace any prediction from root to leaf; every split has a plain-language explanation</li>\n<li>Handles nonlinearity naturally; no feature engineering required</li>\n<li>No feature scaling needed \u2014 splits are threshold comparisons, not distances</li>\n<li>Fast inference: O(depth) per prediction</li>\n</ul>\n<span class=\"paragraph\"><strong>Weaknesses:</strong></span>\n<ul>\n<li><strong>High variance</strong> \u2014 a small change in training data can produce an entirely different tree</li>\n<li>Prone to overfitting without tight depth/leaf constraints</li>\n<li><strong>Axis-aligned boundaries only</strong> \u2014 can't efficiently represent a diagonal decision surface;\n  requires many splits to approximate a simple line at 45\u00b0</li>\n<li>Unstable: one mislabeled sample near a boundary can restructure the whole tree</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><em>\"A single decision tree is rarely used alone in production. It's the building block for ensembles.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "9e110871191eb4c15b231a6192f1fa29",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-2-random-forests-variance-reduction-through-bagging\">Part 2: Random Forests \u2014 Variance Reduction Through Bagging</h2>\n<span class=\"paragraph\"><strong>The insight:</strong> a single tree is unstable (high variance). What if we build many trees and average them?</span>\n<h3 id=\"bagging-bootstrap-aggregating\">Bagging (Bootstrap AGGregating)</h3>\n<ol>\n<li>Draw B <strong>bootstrap samples</strong> \u2014 random samples <em>with replacement</em> from training data (each ~63% unique)</li>\n<li>Train one fully-grown tree on each bootstrap sample</li>\n<li><strong>Aggregate:</strong> average predictions (regression) or majority vote (classification)</li>\n</ol>\n<h3 id=\"random-feature-subsampling\">Random Feature Subsampling</h3>\n<span class=\"paragraph\">At each split, only consider a random subset of features:</span>\n<ul>\n<li>Classification: \u221an_features</li>\n<li>Regression: n_features / 3</li>\n</ul>\n<span class=\"paragraph\"><strong>Why this matters:</strong> without it, every tree would lead with the same strong features \u2192 correlated\ntrees \u2192 averaging correlated trees barely reduces variance.  Forcing different feature subsets\n\u2192 decorrelated trees \u2192 much better variance reduction.</span>\n<h3 id=\"the-math-intuition\">The Math Intuition</h3>\n<span class=\"paragraph\">Variance of the mean of B variables with variance \u03c3\u00b2 and pairwise correlation \u03c1:</span>\n<blockquote>\n<span class=\"paragraph\">Var(mean) = \u03c1\u03c3\u00b2 + (1\u2212\u03c1)\u03c3\u00b2/B</span>\n</blockquote>\n<span class=\"paragraph\">As B \u2192 \u221e this approaches <strong>\u03c1\u03c3\u00b2</strong> \u2014 the correlation floor.\nFeature subsampling lowers \u03c1.  Lower \u03c1 \u2192 lower ensemble variance.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "233c82802a3b3a9066c2f21df6c408f0",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "9032760cab6151b94b224985c2769366",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "49de3aaa6bb7db3b033e946521763bad",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "1513a72448d85902c056d88fce8703a4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"out-of-bag-oob-error\">Out-of-Bag (OOB) Error</h3>\n<span class=\"paragraph\">Each bootstrap sample uses ~63% of the data (sampling with replacement means ~37% of\nsamples are never drawn for a given tree). Those are \"out of bag\" \u2014 the tree never saw them,\nso we can evaluate predictions on them honestly.</span>\n<span class=\"paragraph\"><strong>Result:</strong> a free validation estimate \u2014 no cross-validation or holdout set needed.\nOOB error \u2248 leave-one-out cross-validation accuracy, computed during training at no extra cost.\nEnable with <code>RandomForestClassifier(oob_score=True)</code> \u2192 check <code>.oob_score_</code> after fitting.</span>\n<h3 id=\"random-forest-strengths-and-weaknesses\">Random Forest: Strengths and Weaknesses</h3>\n<span class=\"paragraph\"><strong>Strengths:</strong></span>\n<ul>\n<li>Much lower variance than a single tree \u2014 averaging decorrelated trees is a powerful stabilizer</li>\n<li><strong>Parallelizable</strong> \u2014 each tree is independent; all 500 can train simultaneously</li>\n<li><strong>OOB error for free</strong> \u2014 honest validation estimate without a separate holdout</li>\n<li>Robust to overfitting \u2014 more trees never hurts (unlike boosting)</li>\n<li>Feature importance built in</li>\n</ul>\n<span class=\"paragraph\"><strong>Weaknesses:</strong></span>\n<ul>\n<li><strong>Doesn't reduce bias</strong> \u2014 if individual trees underfit, the forest still underfits.\n  Bagging reduces variance, not bias. You need boosting for bias reduction.</li>\n<li>Slower inference than a single tree (must traverse all N trees)</li>\n<li>Less interpretable than a single tree \u2014 you lose the \"explain every prediction\" property</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><em>\"Random forests reduce variance but don't reduce bias. Boosting reduces bias.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "b2b8bec6136db6f4dd3c1cec6716a3d5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-3-gradient-boosting-xgboost-bias-reduction-through-sequential-learning\">Part 3: Gradient Boosting / XGBoost \u2014 Bias Reduction Through Sequential Learning</h2>\n<span class=\"paragraph\"><strong>The insight:</strong> instead of building trees in <em>parallel</em> (bagging), build them <em>sequentially</em>\nwhere each new tree corrects the mistakes of all previous trees.</span>\n<h3 id=\"gradient-boosting-algorithm\">Gradient Boosting Algorithm</h3>\n<ol>\n<li><strong>Initialize:</strong> start with a simple prediction \u2014 the mean of training targets</li>\n<li><strong>Compute residuals:</strong> errors of the current ensemble on training data</li>\n<li><strong>Fit a shallow tree</strong> to the residuals \u2014 this tree learns what the ensemble currently gets wrong</li>\n<li>\n<span class=\"paragraph\"><strong>Add the tree</strong> to the ensemble, scaled by learning rate \u03b7:</span>\n<blockquote>\n<span class=\"paragraph\">F(x) \u2190 F(x) + \u03b7 \u00b7 h(x)</span>\n</blockquote>\n</li>\n<li><strong>Repeat:</strong> each new tree focuses on the remaining errors</li>\n</ol>\n<h3 id=\"why-shallow-trees\">Why shallow trees?</h3>\n<span class=\"paragraph\">Deep trees overfit to residuals. Shallow trees (depth 3\u20136) are <strong>weak learners</strong> \u2014 each\ncontributes a small, targeted correction. Many weak learners \u2192 strong learner.</span>\n<h3 id=\"learning-rate\">Learning Rate</h3>\n<span class=\"paragraph\">Shrinks each tree's contribution. Lower \u03b7 \u2192 smaller steps \u2192 better generalization \u2192 more trees needed.\nTypical range: 0.01\u20130.3. Always pair a lower learning rate with more estimators.</span>\n<h3 id=\"boosting-is-gradient-descent-in-function-space\">\"Boosting is gradient descent in function space\"</h3>\n<span class=\"paragraph\">At each step, we move in the direction that reduces the loss \u2014 exactly like gradient descent,\nbut we're moving through the space of <em>functions</em>, not parameter vectors.\nFor squared-error loss, the residuals ARE the negative gradient.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "c5735a1469ec049c822bb342b19a1e1a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"xgboost-key-advantages-over-vanilla-gradient-boosting\">XGBoost: Key Advantages Over Vanilla Gradient Boosting</h3>\n<span class=\"paragraph\">XGBoost keeps the core algorithm and adds:</span>\n<ul>\n<li><strong>Regularization on leaf weights</strong> \u2014 L1 (<code>reg_alpha</code>) and L2 (<code>reg_lambda</code>) penalties on\n  leaf values; the trees themselves become regularized, not just the ensemble</li>\n<li><strong>Learned missing value handling</strong> \u2014 at each split, XGBoost learns the optimal direction\n  for samples with missing values; no imputation needed</li>\n<li><strong>Column subsampling</strong> (<code>colsample_bytree</code>) \u2014 borrows the random forest idea; decorrelates\n  trees and acts as additional regularization</li>\n<li><strong>Row subsampling</strong> (<code>subsample</code>) \u2014 use a random fraction of rows per tree; faster + regularizing</li>\n<li><strong>Histogram-based splitting</strong> (LightGBM extends this further) \u2014 bucketize continuous features\n  into bins \u2192 faster split finding, smaller memory footprint</li>\n<li><strong>System optimizations</strong> \u2014 parallelized tree building within each level, cache-aware access,\n  out-of-core computation for very large datasets</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><em>\"XGBoost = gradient boosting + regularization + engineering optimizations\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "aca34c00a0f59fe97a2261b7ab1d7b1d",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "646ec09ed5a9a9dc790710ae9916416a",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "51ec18032adeabd9ffb7ec6183bc6e1f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"hyperparameter-guide-the-5-that-matter-most\">Hyperparameter Guide \u2014 The 5 That Matter Most</h3>\n<span class=\"paragraph\">In priority order:</span>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Parameter</th>\n<th>Range</th>\n<th>What it controls</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td><code>n_estimators</code> + <code>early_stopping_rounds</code></td>\n<td>100\u20135000</td>\n<td>How many trees \u2014 let early stopping decide</td>\n</tr>\n<tr>\n<td>2</td>\n<td><code>learning_rate</code></td>\n<td>0.01\u20130.3</td>\n<td>Step size; lower = better generalization but needs more trees</td>\n</tr>\n<tr>\n<td>3</td>\n<td><code>max_depth</code></td>\n<td>3\u20138</td>\n<td>Individual tree complexity; start at 4\u20136</td>\n</tr>\n<tr>\n<td>4</td>\n<td><code>subsample</code></td>\n<td>0.7\u20130.9</td>\n<td>Row sampling fraction per tree \u2014 stochastic regularization</td>\n</tr>\n<tr>\n<td>5</td>\n<td><code>colsample_bytree</code></td>\n<td>0.7\u20130.9</td>\n<td>Feature sampling per tree \u2014 like random forests</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Tuning strategy:</strong></span>\n<ol>\n<li>Start with defaults (<code>learning_rate=0.1</code>, <code>max_depth=6</code>, <code>subsample=0.8</code>)</li>\n<li>Add <code>early_stopping_rounds=50</code> on a validation set \u2192 optimal <code>n_estimators</code> for free</li>\n<li>Tune <code>learning_rate</code> + <code>n_estimators</code> together (lower LR \u2192 more trees)</li>\n<li>Then tune <code>max_depth</code>, <code>subsample</code>, <code>colsample_bytree</code></li>\n</ol>\n<span class=\"paragraph\"><strong>L1/L2 regularization</strong> (<code>reg_alpha</code>, <code>reg_lambda</code>) are useful fine-tuning levers but rarely\nthe first knobs to turn.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "888aab18b70d1a15c862e428692c76d2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-4-feature-importance-interpretability\">Part 4: Feature Importance \u2014 Interpretability</h2>\n<span class=\"paragraph\">Three flavors, each with different tradeoffs:</span>\n<table>\n<thead>\n<tr>\n<th>Method</th>\n<th>How</th>\n<th>Speed</th>\n<th>Bias</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Split-based (impurity)</strong></td>\n<td>Total impurity reduction across all splits on feature X</td>\n<td>Fast (free from training)</td>\n<td>Biased toward high-cardinality features</td>\n<td>Quick feature screening</td>\n</tr>\n<tr>\n<td><strong>Permutation importance</strong></td>\n<td>Shuffle feature X; measure accuracy drop</td>\n<td>Moderate (N\u00d7features evaluations)</td>\n<td>Unbiased; works for any model</td>\n<td>Reliable global ranking</td>\n</tr>\n<tr>\n<td><strong>SHAP values</strong></td>\n<td>Game-theoretic: each feature's marginal contribution to each prediction</td>\n<td>Slow</td>\n<td>Most rigorous; consistent and locally accurate</td>\n<td>Explaining individual predictions; stakeholder reports</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>When to use which:</strong></span>\n<ul>\n<li>Quick feature screening \u2192 <strong>split-based</strong> (built into sklearn/xgboost)</li>\n<li>Reliable global importance \u2192 <strong>permutation importance</strong></li>\n<li>Explaining individual predictions \u2192 <strong>SHAP</strong></li>\n<li>Production stakeholder reports \u2192 <strong>SHAP</strong> (most defensible; contributions sum to the prediction)</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "339812c152f2d0cf87d1c03e7c6731d9",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "6ebd63e3689490b8038750b21201558b",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "382c38664ec79c7ab0a513290b1511d1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"shap-values-the-gold-standard-for-interpretability\">SHAP Values \u2014 The Gold Standard for Interpretability</h3>\n<span class=\"paragraph\"><strong>SHAP</strong> (SHapley Additive exPlanations) comes from cooperative game theory.</span>\n<span class=\"paragraph\"><strong>The question:</strong> for a specific prediction, how much did each feature <em>contribute</em> to pushing\nthe prediction away from the baseline (average prediction across all data)?</span>\n<span class=\"paragraph\"><strong>Key properties:</strong></span>\n<ul>\n<li>Contributions <strong>sum exactly</strong> to (prediction \u2212 baseline) \u2014 they add up</li>\n<li><strong>Consistent</strong> \u2014 if feature X always has a larger effect in model A than B, SHAP ranks it higher in A</li>\n<li><strong>Fair</strong> \u2014 considers all possible orderings in which features could have been introduced</li>\n</ul>\n<span class=\"paragraph\"><strong>Two main views:</strong></span>\n<ul>\n<li><strong>Force plot</strong> (one prediction): shows which features pushed toward the positive vs negative\n  class, and by how much. Color = direction; length = magnitude.</li>\n<li><strong>Summary plot</strong> (all predictions): shows feature importance (y-axis = feature, x-axis = SHAP value)\n  AND direction of effect (feature value mapped to color). Tells you both <em>which</em> features matter\n  and <em>how</em> they matter.</li>\n</ul>\n<span class=\"paragraph\"><strong>Usage:</strong> <code>pip install shap</code>, then <code>shap.TreeExplainer(model)</code> for tree models\n(much faster than model-agnostic SHAP).</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"SHAP is the gold standard for model interpretability. If someone asks 'why did the model\npredict this?' \u2014 SHAP is the answer.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "28614b891f5cd8353cfd1f09bf6e9a73",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"when-to-use-what-the-decision-framework\">When to Use What \u2014 The Decision Framework</h2>\n<table>\n<thead>\n<tr>\n<th>Scenario</th>\n<th>Model</th>\n<th>Why</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>First model on tabular data</td>\n<td><strong>XGBoost / LightGBM</strong></td>\n<td>Best default; handles everything out of the box</td>\n</tr>\n<tr>\n<td>Need full interpretability</td>\n<td><strong>Shallow decision tree</strong> or logistic regression</td>\n<td>Stakeholders can read every split</td>\n</tr>\n<tr>\n<td>Very small dataset (&lt;1K rows)</td>\n<td><strong>Random forest</strong></td>\n<td>Less prone to overfitting than boosting</td>\n</tr>\n<tr>\n<td>Large dataset, need speed</td>\n<td><strong>LightGBM</strong></td>\n<td>Histogram-based splitting; fastest tree library</td>\n</tr>\n<tr>\n<td>Categorical features dominate</td>\n<td><strong>CatBoost</strong></td>\n<td>Native categorical handling; no encoding required</td>\n</tr>\n<tr>\n<td>Feature interactions unknown</td>\n<td><strong>Any tree-based</strong></td>\n<td>Trees capture interactions automatically</td>\n</tr>\n<tr>\n<td>Text / images / sequences</td>\n<td><strong>Neural networks</strong></td>\n<td>Trees can't learn representations from raw input</td>\n</tr>\n<tr>\n<td>Kaggle competition</td>\n<td><strong>Stack XGBoost + LightGBM + CatBoost</strong></td>\n<td>Diversity in ensemble wins competitions</td>\n</tr>\n<tr>\n<td>Strict inference latency</td>\n<td><strong>Single shallow tree</strong> or logistic regression</td>\n<td>An ensemble of 500 trees adds up; trees aren't free</td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h3 id=\"bagging-vs-boosting-side-by-side\">Bagging vs Boosting \u2014 Side-by-Side</h3>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>Random Forest (Bagging)</th>\n<th>XGBoost (Boosting)</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Training</strong></td>\n<td>Parallel \u2014 trees are independent</td>\n<td>Sequential \u2014 each tree depends on all previous</td>\n</tr>\n<tr>\n<td><strong>Goal</strong></td>\n<td>Reduce variance</td>\n<td>Reduce bias (plus variance via regularization)</td>\n</tr>\n<tr>\n<td><strong>Individual trees</strong></td>\n<td>Deep, fully grown</td>\n<td>Shallow weak learners</td>\n</tr>\n<tr>\n<td><strong>Overfitting risk</strong></td>\n<td>Low \u2014 more trees never hurts</td>\n<td>Higher \u2014 too many trees overfits; use early stopping</td>\n</tr>\n<tr>\n<td><strong>Training speed</strong></td>\n<td>Embarrassingly parallelizable</td>\n<td>Sequential, though each level is parallelizable</td>\n</tr>\n<tr>\n<td><strong>When to prefer</strong></td>\n<td>Small data, want stability, quick baseline</td>\n<td>Large data, want maximum accuracy</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "f6a75ed3cc9e5cb4224c7422f7039998",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>Answer</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>How does a decision tree decide where to split?</td>\n<td>Finds the feature + threshold that maximizes information gain (Gini or entropy reduction for classification, variance reduction for regression)</td>\n</tr>\n<tr>\n<td>Why do single decision trees overfit?</td>\n<td>High variance \u2014 small data changes produce completely different trees. Deep trees memorize noise.</td>\n</tr>\n<tr>\n<td>What does a random forest add over a single tree?</td>\n<td>Trains many trees on bootstrap samples with random feature subsets at each split, then averages. Reduces variance through decorrelation.</td>\n</tr>\n<tr>\n<td>Why does random forest use feature subsampling?</td>\n<td>Without it, all trees lead with the same strong features \u2192 correlated trees \u2192 averaging them doesn't reduce variance much</td>\n</tr>\n<tr>\n<td>How does boosting differ from bagging?</td>\n<td>Bagging trains trees independently in parallel (reduces variance). Boosting trains sequentially, each tree correcting the previous one's errors (reduces bias).</td>\n</tr>\n<tr>\n<td>What is the learning rate in XGBoost?</td>\n<td>Shrinks each tree's contribution. Lower = more trees needed but better generalization. Prevents overfitting by taking smaller steps in function space.</td>\n</tr>\n<tr>\n<td>Why use early stopping for XGBoost but not random forests?</td>\n<td>More boosting trees can overfit (sequential error correction overshoots). More bagging trees never hurts (averaging can only stabilize, not overfit).</td>\n</tr>\n<tr>\n<td>Name 3 types of feature importance</td>\n<td>Split-based (fast, biased toward high cardinality), permutation (reliable, model-agnostic), SHAP (best, expensive \u2014 local and global)</td>\n</tr>\n<tr>\n<td>When would you use a neural net instead of XGBoost?</td>\n<td>Non-tabular data (images, text, sequences), very large datasets (100M+ rows), tasks requiring representation learning from raw input</td>\n</tr>\n<tr>\n<td>What's XGBoost's key advantage over vanilla gradient boosting?</td>\n<td>Regularization on leaf weights, native missing value handling, column/row subsampling, system-level speed optimizations</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "00b7e968d767603920f83817cf33457f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<hr />\n<h3 id=\"walk-me-through-how-gradient-boosting-works\">\"Walk me through how gradient boosting works.\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Start with a simple prediction \u2014 typically the mean of the targets. Compute the residuals:\nwhat the current model gets wrong. Fit a shallow tree to those residuals \u2014 it learns to\npredict the errors, not the original labels. Add that tree to the ensemble, scaled by a\nlearning rate. Repeat: each new tree focuses on what all previous trees combined still miss.\nUse early stopping on a validation set \u2014 too many trees and you overfit to the residuals.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"why-would-you-pick-xgboost-over-a-neural-network\">\"Why would you pick XGBoost over a neural network?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"For tabular data, trees almost always win. They handle mixed types without encoding,\ncapture nonlinear interactions automatically, train faster, and give you feature importance\nfor free. XGBoost adds regularization, missing value handling, and serious engineering\noptimizations on top of that. I'd only reach for a neural net if I needed to learn\nrepresentations from raw text or images, or if my dataset was massive \u2014 100M+ rows \u2014 where\ndeep learning's capacity starts to matter more.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"how-do-you-explain-model-predictions-to-stakeholders\">\"How do you explain model predictions to stakeholders?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"I use SHAP values. For a specific prediction, SHAP tells me exactly which features pushed\nthe output up or down and by how much \u2014 and those contributions sum to the prediction\nitself, which makes them easy to explain. For global understanding I use SHAP summary plots,\nwhich show which features matter most <em>and</em> in which direction. It's the most defensible\nmethod because it's grounded in game theory.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"connection-to-my-work\">Connection to my work</h3>\n<span class=\"paragraph\">In my <strong>fraud detection system design</strong>, I chose XGBoost as the V1 model specifically for\nthe interpretability requirement \u2014 regulators need to know <em>why</em> a transaction was declined.\nSHAP values generate human-readable reason codes directly from model output with no extra\nengineering.</span>\n<span class=\"paragraph\">In my <strong>backtesting engine</strong>, feature importance helps distinguish which technical indicators\nactually drive strategy performance vs which are noise that happened to correlate in the\ntraining window \u2014 a key part of avoiding overfitting to historical data.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

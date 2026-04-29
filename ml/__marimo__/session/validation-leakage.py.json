@@ -8,7 +8,14 @@
     {
       "id": "Hbol",
       "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -66,7 +73,14 @@
     {
       "id": "PKri",
       "code_hash": "855aac9e1426656f884ea0836762e88f",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -98,7 +112,14 @@
     {
       "id": "BYtC",
       "code_hash": "8fcc93241e5901b8550d1eab9dd1e666",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -117,7 +138,14 @@
     {
       "id": "Kclp",
       "code_hash": "17ea4d112ed00041862c42c4697df944",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -136,7 +164,14 @@
     {
       "id": "Hstk",
       "code_hash": "729dcb7ae78d9101b85a3d29795b7c4b",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -155,7 +190,14 @@
     {
       "id": "iLit",
       "code_hash": "1df06f98ee9c4e19ceee83b22fc86797",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
