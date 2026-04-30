@@ -13,7 +13,9 @@
       "Bash(venv/Scripts/python.exe *)",
       "Read(//usr/bin/**)",
       "Read(//home/ukule/.local/bin/**)",
-      "Bash(./venv/Scripts/python.exe *)"
+      "Bash(./venv/Scripts/python.exe *)",
+      "Bash(git -C /mnt/c/Users/ukule/PycharmProjects/learning-log ls-files .gitignore)",
+      "Bash(git *)"
     ]
   }
 }

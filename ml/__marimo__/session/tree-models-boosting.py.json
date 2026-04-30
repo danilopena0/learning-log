@@ -65,7 +65,14 @@
     {
       "id": "Xref",
       "code_hash": "2613c8d6bfbb15ab67589ecef269613b",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
