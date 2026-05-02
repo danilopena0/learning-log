@@ -90,7 +90,6 @@ def _(mo):
 def _dt_boundary():
     import numpy as _np
     import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_moons as _make_moons
     from sklearn.model_selection import train_test_split as _tts
@@ -136,9 +135,8 @@ def _dt_boundary():
 @app.cell
 def _tree_structure():
     import numpy as _np
-    import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
+
     from sklearn.datasets import make_moons as _make_moons
     from sklearn.model_selection import train_test_split as _tts
     from sklearn.tree import DecisionTreeClassifier as _DTC, plot_tree as _plot_tree
@@ -171,7 +169,6 @@ def _tree_structure():
 def _overfitting_demo():
     import numpy as _np
     import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_moons as _make_moons
     from sklearn.model_selection import train_test_split as _tts
@@ -286,7 +283,6 @@ def _(mo):
 def _rf_vs_tree():
     import numpy as _np
     import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_moons as _make_moons
     from sklearn.model_selection import train_test_split as _tts
@@ -340,7 +336,6 @@ def _rf_vs_tree():
 def _variance_reduction():
     import numpy as _np
     import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from matplotlib.lines import Line2D as _Line2D
     from sklearn.datasets import make_moons as _make_moons
@@ -404,8 +399,6 @@ def _variance_reduction():
 @app.cell
 def _oob_demo():
     import numpy as _np
-    import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_moons as _make_moons
     from sklearn.model_selection import train_test_split as _tts
@@ -505,6 +498,33 @@ def _(mo):
     At each step, we move in the direction that reduces the loss — exactly like gradient descent,
     but we're moving through the space of *functions*, not parameter vectors.
     For squared-error loss, the residuals ARE the negative gradient.
+
+    **Regular gradient descent** updates parameters:
+    > θ ← θ − α · ∇L(θ)
+
+    The gradient tells you: *nudge each parameter in this direction to reduce loss.*
+
+    **Gradient boosting's insight:** instead of parameters, you have *predictions* — one per training
+    example. Think of the prediction vector `F = [F(x₁), F(x₂), ..., F(xₙ)]` as the thing being
+    optimized. The gradient is now: *how should each prediction change to reduce loss?*
+
+    > ∂L / ∂F(xᵢ)  ←  gradient w.r.t. a prediction, not a weight
+
+    You move in function space by **adding a new tree** that approximates the negative gradient.
+
+    **Why residuals = negative gradient for MSE:**
+
+    With squared-error loss `L = Σ (yᵢ − F(xᵢ))²`:
+
+    > ∂L / ∂F(xᵢ) = −2(yᵢ − F(xᵢ))  =  −2 · residualᵢ
+
+    The negative gradient is proportional to the residual. Fitting each tree to residuals *is*
+    gradient descent — you're chasing the steepest downhill direction in prediction space.
+
+    **Why this matters for other losses:** for log-loss or MAE, the negative gradient is *not*
+    the residual — it's something else. Gradient boosting still works (fit a tree to the negative
+    gradient), but you can no longer call them residuals. Residuals are just the special case MSE
+    gives you for free.
     """)
     return
 
@@ -536,8 +556,6 @@ def _(mo):
 @app.cell
 def _boosting_residuals():
     import numpy as _np
-    import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.tree import DecisionTreeRegressor as _DTR
 
@@ -613,8 +631,6 @@ def _boosting_residuals():
 @app.cell
 def _boosting_overfitting():
     import numpy as _np
-    import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_moons as _make_moons
     from sklearn.model_selection import train_test_split as _tts
@@ -731,8 +747,6 @@ def _(mo):
 @app.cell
 def _importance_comparison():
     import numpy as _np
-    import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_classification as _make_clf
     from sklearn.model_selection import train_test_split as _tts
@@ -793,8 +807,6 @@ def _importance_comparison():
 @app.cell
 def _perm_from_scratch():
     import numpy as _np
-    import matplotlib as _matplotlib
-    _matplotlib.use("Agg")
     import matplotlib.pyplot as _plt
     from sklearn.datasets import make_classification as _make_clf
     from sklearn.model_selection import train_test_split as _tts

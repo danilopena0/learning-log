@@ -7,6 +7,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -63,7 +64,9 @@ def why_smells_matter(mo):
 
 @app.cell
 def part1_header(mo):
-    mo.md("## Part 1: Function-Level Smells")
+    mo.md("""
+    ## Part 1: Function-Level Smells
+    """)
     return
 
 
@@ -218,7 +221,7 @@ def smell3_ambiguous_none(mo):
         pass
 
     def find_job(job_id: str) -> Job:
-        \"\"\"Raises JobNotFoundError if not found, propagates DB errors.\"\"\"
+        "\""Raises JobNotFoundError if not found, propagates DB errors."\""
         result = db.query("SELECT * FROM jobs WHERE id = %s", (job_id,))
         if not result:
             raise JobNotFoundError(f"Job {job_id} not found")
@@ -308,7 +311,9 @@ def demo_magic_numbers():
 
 @app.cell
 def part2_header(mo):
-    mo.md("## Part 2: Class & Module-Level Smells")
+    mo.md("""
+    ## Part 2: Class & Module-Level Smells
+    """)
     return
 
 
@@ -355,7 +360,7 @@ def smell5_god_class(mo):
         def notify(self, jobs: list[ScoredJob]): ...
 
     class JobSearchPipeline:
-        \"\"\"Orchestrates components — thin coordinator, no business logic.\"\"\"
+        "\""Orchestrates components — thin coordinator, no business logic."\""
         def __init__(self, scraper, embedder, scorer, notifier): ...
 
         def run(self, query: str):
@@ -530,7 +535,9 @@ def demo_primitive_obsession():
 
 @app.cell
 def part3_header(mo):
-    mo.md("## Part 3: Architecture-Level Smells")
+    mo.md("""
+    ## Part 3: Architecture-Level Smells
+    """)
     return
 
 
@@ -763,7 +770,9 @@ def smell11_leaky_abstractions(mo):
 
 @app.cell
 def part4_header(mo):
-    mo.md("## Part 4: Edge Cases & Subtle Smells")
+    mo.md("""
+    ## Part 4: Edge Cases & Subtle Smells
+    """)
     return
 
 
@@ -784,7 +793,7 @@ def smell12_silent_failures(mo):
     try:
         result = llm.score(job_description)
     except Exception:
-        pass  # ¯\\_(ツ)_/¯
+        pass  # ¯\_(ツ)_/¯
     ```
 
     **GOOD — log, handle specifically, or propagate — never swallow:**
@@ -1173,3 +1182,7 @@ def interview_talking_points(mo):
     > abstraction costs more than a little duplication."
     """)
     return
+
+
+if __name__ == "__main__":
+    app.run()

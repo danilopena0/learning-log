@@ -15,7 +15,10 @@
       "Read(//home/ukule/.local/bin/**)",
       "Bash(./venv/Scripts/python.exe *)",
       "Bash(git -C /mnt/c/Users/ukule/PycharmProjects/learning-log ls-files .gitignore)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(uv run *)",
+      "Bash(/mnt/c/Users/ukule/PycharmProjects/learning-log/venv/bin/python -c \"import xgboost; print\\('xgboost', xgboost.__version__\\)\")",
+      "Bash(/mnt/c/Users/ukule/PycharmProjects/learning-log/venv/bin/python -c \"import matplotlib; print\\(matplotlib.__version__\\)\")"
     ]
   }
 }
