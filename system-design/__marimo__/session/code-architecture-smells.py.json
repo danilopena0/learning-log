@@ -163,8 +163,22 @@
     {
       "id": "nWHF",
       "code_hash": "e339249fd7ff5e8e447c5cf317c59c71",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "Valid job: ML Engineer at Acme\n  Salary: $120,000 \u2013 $160,000\n  Skills: ['python', 'pytorch', 'sql']\n\nCaught invalid salary at construction:\n  1 validation error for SalaryRange\nmax_usd\n  Value error, max_usd (100000) must be >= min_usd (200000) [type=value_error, input_value=100000, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "iLit",
