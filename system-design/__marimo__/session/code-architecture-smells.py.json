@@ -39,7 +39,7 @@
     },
     {
       "id": "bkHC",
-      "code_hash": "9c5e77a1ee3a19348c2a024e78f22114",
+      "code_hash": "a24528c333195defc1344c7705823aa8",
       "outputs": [
         {
           "type": "data",
@@ -78,7 +78,7 @@
     },
     {
       "id": "Xref",
-      "code_hash": "bfeaee714692e51bd6ed339749a3c5d0",
+      "code_hash": "fde0d1d88da39a6e68cb4281593d180d",
       "outputs": [
         {
           "type": "data",
@@ -110,7 +110,7 @@
     },
     {
       "id": "RGSE",
-      "code_hash": "0eb142dc9808f514f750246c9c9df297",
+      "code_hash": "bb2a8d610dcf0208d8614f3c89713efe",
       "outputs": [
         {
           "type": "data",
@@ -123,7 +123,7 @@
     },
     {
       "id": "Kclp",
-      "code_hash": "d6bb2495974c5de6dfebe9c2d1a68ad7",
+      "code_hash": "2a6410924bd5d99e0090b1909e465e0a",
       "outputs": [
         {
           "type": "data",
@@ -163,26 +163,12 @@
     {
       "id": "nWHF",
       "code_hash": "e339249fd7ff5e8e447c5cf317c59c71",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "Valid job: ML Engineer at Acme\n  Salary: $120,000 \u2013 $160,000\n  Skills: ['python', 'pytorch', 'sql']\n\nCaught invalid salary at construction:\n  1 validation error for SalaryRange\nmax_usd\n  Value error, max_usd (100000) must be >= min_usd (200000) [type=value_error, input_value=100000, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "outputs": [],
+      "console": []
     },
     {
       "id": "iLit",
-      "code_hash": "469b91fcf0f5828fb97d5fbda1c2dad0",
+      "code_hash": "726c74b8f95e887f44b11e2fd851db9b",
       "outputs": [
         {
           "type": "data",
@@ -247,7 +233,7 @@
     },
     {
       "id": "Vxnm",
-      "code_hash": "f4673380a858822b50f50cf9fbbff896",
+      "code_hash": "bd04ea335ba45bc4fa362963d1614b38",
       "outputs": [
         {
           "type": "data",
@@ -260,7 +246,7 @@
     },
     {
       "id": "DnEU",
-      "code_hash": "01fcf6621c67708959ab76fc2dead23c",
+      "code_hash": "b5dc18510911c65535469c6fb721039f",
       "outputs": [
         {
           "type": "data",
