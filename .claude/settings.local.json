@@ -18,7 +18,8 @@
       "Bash(git *)",
       "Bash(uv run *)",
       "Bash(/mnt/c/Users/ukule/PycharmProjects/learning-log/venv/bin/python -c \"import xgboost; print\\('xgboost', xgboost.__version__\\)\")",
-      "Bash(/mnt/c/Users/ukule/PycharmProjects/learning-log/venv/bin/python -c \"import matplotlib; print\\(matplotlib.__version__\\)\")"
+      "Bash(/mnt/c/Users/ukule/PycharmProjects/learning-log/venv/bin/python -c \"import matplotlib; print\\(matplotlib.__version__\\)\")",
+      "Bash(venv/bin/python -c \"import numpy, scipy, matplotlib; print\\('scipy', scipy.__version__\\)\")"
     ]
   }
 }

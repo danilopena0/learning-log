@@ -1,170 +1,296 @@
 {
-  "version": 1,
+  "version": "1",
   "metadata": {
     "marimo_version": "0.22.0",
     "script_metadata_hash": null
   },
   "cells": [
     {
-      "id": "GVfe",
-      "code_hash": "c4ba2c064b488e44cfb2594a4ff7f221",
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
       "outputs": [],
       "console": []
     },
     {
-      "id": "dNcx",
-      "code_hash": "e49fc980f8416599816a60c7798a853e",
+      "id": "MJUe",
+      "code_hash": "5eb99b187716a3fbba23e61dd3d18265",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"rag-advanced-patterns\">RAG Advanced Patterns</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-05-05</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>AI Engineering</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topic</td>\n<td>Query Rewriting \u00b7 HyDE \u00b7 Reranking \u00b7 Multi-Modal RAG \u00b7 Evaluation Frameworks</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Sequel to</strong>: Week 3 RAG System Design notebook (architecture). This notebook goes deep\non the techniques that take RAG from \"works in a demo\" to \"works in production.\" Every\npattern maps back to <strong>Canopy</strong> (job search retrieval) and the <strong>Briefing Agent</strong> (research\nsummarization).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "65ea82c19eaa487e98a870e4dbd78c62",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"where-basic-rag-fails\">Where Basic RAG Fails</h2>\n<span class=\"paragraph\"><strong>Basic RAG</strong>: embed query \u2192 cosine similarity search \u2192 stuff top K into prompt \u2192 generate.</span>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Failure mode</th>\n<th>Example</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td><strong>Query mismatch</strong></td>\n<td>User asks \"what jobs let me work from home?\" \u2014 JDs say \"remote-eligible.\" Embedding match fails.</td>\n</tr>\n<tr>\n<td>2</td>\n<td><strong>Ranking quality</strong></td>\n<td>Top K by cosine includes irrelevant chunks that share vocabulary. LLM hallucinates from noisy context.</td>\n</tr>\n<tr>\n<td>3</td>\n<td><strong>Multi-hop reasoning</strong></td>\n<td>\"Compare USAA vs H-E-B benefits\" requires retrieving from BOTH and synthesizing. Single pass misses one.</td>\n</tr>\n<tr>\n<td>4</td>\n<td><strong>Stale context</strong></td>\n<td>Retrieved docs are outdated. LLM generates confidently wrong answers from old data.</td>\n</tr>\n<tr>\n<td>5</td>\n<td><strong>Wrong granularity</strong></td>\n<td>Query needs a specific number from a table but retrieval returns a 500-token paragraph around it.</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\">\"Basic RAG gets you to 70% quality. These advanced patterns get you to 90%+.\nThe gap is where production systems live.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "88e7a68bb6f28a26454f84cba4def67d",
       "outputs": [],
       "console": []
     },
     {
-      "id": "172A",
-      "code_hash": "c7fde88defbf1888f3cef63f28d876fc",
+      "id": "lEQa",
+      "code_hash": "720ec5b36c647374bb6a584aac741de5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-1-query-rewriting-fix-the-query-before-searching\">Part 1: Query Rewriting \u2014 Fix the Query Before Searching</h2>\n<span class=\"paragraph\"><strong>The fundamental problem</strong>: user queries are short, ambiguous, and use different vocabulary\nthan the documents.</span>\n<div class=\"language-text codehilite\"><pre><span></span><code>&quot;python ml jobs san antonio&quot;\n     \u2193  the user MEANS\n&quot;machine learning engineer or data scientist requiring Python,\n located in or near San Antonio, TX, onsite or hybrid&quot;\n</code></pre></div>\n<span class=\"paragraph\">The embedding of the short query is a <strong>noisy approximation</strong> of the user's actual intent.\nQuery rewriting uses an LLM to expand or clarify the query <strong>before</strong> retrieval \u2014 not after.</span>\n<h3 id=\"two-patterns\">Two patterns</h3>\n<table>\n<thead>\n<tr>\n<th>Pattern</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Query expansion</strong></td>\n<td>Ambiguous queries, short keyword queries, synonym-heavy domains</td>\n</tr>\n<tr>\n<td><strong>Step-back prompting</strong></td>\n<td>Specific questions that need broader context first</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "950b41ac5077a936871a633dbbce1cc8",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Vlbw",
-      "code_hash": "fa38722cf0d27429e6c164c3f77ca249",
+      "id": "Xref",
+      "code_hash": "35f8280875b08c01d124f20dfd3415a0",
       "outputs": [],
       "console": []
     },
     {
-      "id": "JuzV",
-      "code_hash": "bade66c984689a35dbee6e2f33a7386f",
+      "id": "SFPL",
+      "code_hash": "8468b6af50cea2ec9c5268f6ba206abc",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"my-projects-mapping\">My Projects Mapping</h3>\n<span class=\"paragraph\"><strong>Canopy</strong> \u2014 query expansion would help massively. \"python ml jobs\" gets expanded to capture\n\"machine learning,\" \"data science,\" \"AI engineer\" variants that appear in JDs with different\nwording. This directly addresses the vocabulary mismatch that kills naive embedding search\non short queries.</span>\n<span class=\"paragraph\"><strong>Briefing Agent</strong> \u2014 step-back prompting for research queries. \"What's the latest on RLHF\nalternatives?\" \u2192 step-back: \"What are the current approaches to aligning large language\nmodels?\" Captures DPO, RLAIF, constitutional AI papers the specific query would miss.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "20474e53b6cc988748eb494590998676",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-2-hyde-hypothetical-document-embeddings\">Part 2: HyDE \u2014 Hypothetical Document Embeddings</h2>\n<span class=\"paragraph\"><strong>The insight</strong>: instead of embedding the SHORT QUERY (noisy), ask the LLM to write a\nHYPOTHETICAL ANSWER, then embed THAT.</span>\n<span class=\"paragraph\"><strong>Why this works</strong>: the hypothetical answer is in the same \"language\" as the documents.\nIts embedding is geometrically closer to relevant documents than the raw query embedding.</span>\n<div class=\"language-teratermmacro codehilite\"><pre><span></span><code><span class=\"nv\">User</span><span class=\"w\"> </span><span class=\"nv\">query</span>:<span class=\"w\"> </span><span class=\"s2\">&quot;What San Antonio companies are hiring ML engineers?&quot;</span>\n<span class=\"w\">     </span>\u2193<span class=\"w\">  </span><span class=\"nv\">LLM</span><span class=\"w\"> </span><span class=\"nv\">generates</span><span class=\"w\"> </span><span class=\"nv\">hypothetical</span><span class=\"w\"> </span><span class=\"nv\">answer</span>\n<span class=\"err\">&quot;Several San Antonio companies are actively hiring ML engineers. USAA has roles focused</span>\n<span class=\"err\"> on fraud detection and risk modeling. Rackspace is building AI/ML teams for cloud</span>\n<span class=\"w\"> </span><span class=\"nv\">optimization</span>.<span class=\"w\"> </span><span class=\"nv\">H</span><span class=\"o\">-</span><span class=\"nv\">E</span><span class=\"o\">-</span><span class=\"nv\">B</span><span class=\"err\">&#39;s digital division has data science positions...&quot;</span>\n<span class=\"err\">     \u2193  embed the hypothetical (NOT the query)</span>\n<span class=\"err\">[0.12, -0.34, 0.87, ...]  \u2190 embedding in document space</span>\n<span class=\"err\">     \u2193  ANN search</span>\n<span class=\"err\">[relevant JDs and company pages]</span>\n</code></pre></div>\n<span class=\"paragraph\">The hypothetical answer doesn't need to be <strong>correct</strong> \u2014 it just needs to be in the right\nsemantic neighborhood.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "70d52e8dc121747b4f7aba68430ecdb8",
       "outputs": [],
       "console": []
     },
     {
-      "id": "3TnD",
-      "code_hash": "72f498779d1ac6284c4e49bd1fb1c79d",
+      "id": "Kclp",
+      "code_hash": "daf108ef7c079163c334e840b6c19967",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"when-hyde-helps-vs-hurts\">When HyDE Helps vs Hurts</h3>\n<table>\n<thead>\n<tr>\n<th>Scenario</th>\n<th>Effect</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Factual questions with domain vocabulary</td>\n<td><strong>Helps</strong> \u2014 hypothetical uses correct terms</td>\n</tr>\n<tr>\n<td>Complex queries where vocabulary mismatch is the main problem</td>\n<td><strong>Helps</strong></td>\n</tr>\n<tr>\n<td>LLM hallucinates wrong terminology (wrong domain)</td>\n<td><strong>Hurts</strong> \u2014 finds documents matching wrong answer</td>\n</tr>\n<tr>\n<td>Simple keyword queries that already work</td>\n<td><strong>Wasteful</strong> \u2014 adds LLM call with no gain</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Cost</strong>: one LLM call per query. Worth it for complex queries, wasteful for simple ones.</span>\n<span class=\"paragraph\"><strong>Mitigation</strong>: always combine HyDE with direct query retrieval via RRF (implemented above).\nIf HyDE goes wrong, the direct query still contributes.</span>\n<blockquote>\n<span class=\"paragraph\">\"I'd use HyDE selectively in Canopy \u2014 only for ambiguous queries where the first\nretrieval pass returns low-confidence results.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "8fd724d2f3e7fdee50b6e4157ec0f521",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-3-reranking-the-quality-multiplier\">Part 3: Reranking \u2014 The Quality Multiplier</h2>\n<span class=\"paragraph\"><strong>Initial retrieval (bi-encoder)</strong> optimizes for SPEED:</span>\n<ul>\n<li>Encode query and documents separately</li>\n<li>Fast ANN search (milliseconds for millions of docs)</li>\n<li>But: separate encoding can't compare query and document jointly \u2014 misses nuance</li>\n</ul>\n<span class=\"paragraph\"><strong>Cross-encoder reranking</strong> optimizes for PRECISION:</span>\n<ul>\n<li>Take top 20-50 candidates from retrieval</li>\n<li>Feed each <code>(query, document)</code> pair jointly through a model</li>\n<li>The model sees both together \u2192 can reason about their relationship</li>\n<li>Typical improvement: <strong>10-20% recall@5</strong> over retrieval alone</li>\n</ul>\n<span class=\"paragraph\">This is the <strong>single highest-ROI addition</strong> to any RAG system.</span>\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>Retrieval:  [doc_3, doc_17, doc_42, doc_1, doc_9, ...]   \u2190 fast, noisy (top 20)\n     \u2193  cross-encoder scores each pair jointly\nReranked:   [doc_17, doc_1, doc_42, ...]                  \u2190 slow, precise (top 5)\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "ded7304ba05b125ce0d4239a65454541",
       "outputs": [],
       "console": []
     },
     {
-      "id": "R14l",
-      "code_hash": "39b7152755cf03b66cba0a5c9d146815",
+      "id": "nWHF",
+      "code_hash": "02df514585fc3cd31258464001227c31",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"reranker-options\">Reranker Options</h3>\n<table>\n<thead>\n<tr>\n<th>Reranker</th>\n<th>Quality</th>\n<th>Speed</th>\n<th>Cost</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>cross-encoder/ms-marco-MiniLM-L-6-v2</code></td>\n<td>Good</td>\n<td>~5ms/pair</td>\n<td>Free (local)</td>\n</tr>\n<tr>\n<td><code>BAAI/bge-reranker-v2-m3</code></td>\n<td>Great</td>\n<td>~15ms/pair</td>\n<td>Free (local)</td>\n</tr>\n<tr>\n<td>Cohere Rerank</td>\n<td>Excellent</td>\n<td>~20ms/pair</td>\n<td>$1/1K queries</td>\n</tr>\n<tr>\n<td>ColBERT (late interaction)</td>\n<td>Great</td>\n<td>Fast at scale</td>\n<td>Free (local), complex setup</td>\n</tr>\n<tr>\n<td>LLM-as-reranker (GPT-4/Claude)</td>\n<td>Best</td>\n<td>~500ms</td>\n<td>Expensive</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Pick</strong>: BGE-reranker for free + high quality. Cohere for managed simplicity.\nLLM-as-reranker only for very high-stakes queries.</span>\n<h3 id=\"my-projects-mapping\">My Projects Mapping</h3>\n<span class=\"paragraph\"><strong>Canopy</strong>: currently no reranking. Adding <code>cross-encoder/ms-marco-MiniLM-L-6-v2</code> on\ntop-20 sqlite-vec results would be ~50 lines of code and probably the <strong>single\nhighest-impact improvement</strong> I could make. This is gap #5 from my Canopy gap analysis.</span>\n<span class=\"paragraph\"><strong>Briefing Agent</strong>: rerank research paper results by relevance to the day's focus topic.\nCurrently takes top K by embedding similarity \u2014 sometimes surfaces tangentially related\npapers that share vocabulary but aren't on-topic.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "65c912932cfffef5796b9889156691fe",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-4-advanced-retrieval-architectures\">Part 4: Advanced Retrieval Architectures</h2>\n<h3 id=\"contextual-retrieval-anthropics-method\">Contextual Retrieval (Anthropic's method)</h3>\n<span class=\"paragraph\"><strong>Problem</strong>: when you chunk a document, each chunk loses context of the whole.\n\"Treatment of fever in children under 2\" makes sense inside a pediatric article \u2014\nas a standalone chunk it's ambiguous.</span>\n<span class=\"paragraph\"><strong>Solution</strong>: prepend a short context blurb to each chunk <strong>before embedding</strong>.</span>\n<div class=\"language-text codehilite\"><pre><span></span><code>Original chunk:\n&quot;Treatment should begin with acetaminophen at 10-15mg/kg...&quot;\n\nContextualized chunk (what gets embedded):\n&quot;[From: AAP Guidelines on Pediatric Fever Management, Section 3: Treatment Protocols]\n Treatment should begin with acetaminophen at 10-15mg/kg...&quot;\n</code></pre></div>\n<span class=\"paragraph\"><strong>Implementation</strong>: at index time, for each chunk ask an LLM:\n<em>\"Given the full document, write a 1-2 sentence context for this chunk.\"</em>\nPrepend to chunk text before embedding.</span>\n<span class=\"paragraph\"><strong>Cost</strong>: one LLM call per chunk at <strong>index time</strong> (not query time). Affordable for static\ncorpora. Run it once when you build the index, not on every query.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "9839904d72786c3ca66d4ddbda1cf483",
       "outputs": [],
       "console": []
     },
     {
-      "id": "4XD2",
-      "code_hash": "792d89767913b79522aff756df09de22",
+      "id": "ROlb",
+      "code_hash": "c153035a14570c6f43e8a0c1d745cf7a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"parent-child-retrieval\">Parent-Child Retrieval</h3>\n<span class=\"paragraph\"><strong>Problem</strong>: small chunks embed well (focused, precise) but lack surrounding context.\nLarge chunks have context but embed poorly (diluted signal across many topics).</span>\n<span class=\"paragraph\"><strong>Solution</strong>: index SMALL chunks (256 tokens) for precise matching, return the PARENT\nchunk (1024 tokens) for rich context.</span>\n<div class=\"language-diff codehilite\"><pre><span></span><code><span class=\"gh\">Index:    [small chunk 1] \u2192 [small chunk 2] \u2192 [small chunk 3]</span>\n<span class=\"w\"> </span>               \u2191                   \u2191                   \u2191\n<span class=\"w\"> </span>         all point to same parent chunk (1024 tokens)\n\nQuery time:\n\n1. Retrieve by small chunk similarity  (precise match)\n\n2. Look up parent chunk pointer        (from metadata)\n\n3. Return parent chunk to LLM          (rich context)\n</code></pre></div>\n<span class=\"paragraph\">The LLM gets the broader context it needs to generate a good answer, while retrieval\noperates on precise, focused embeddings.</span>\n<h3 id=\"agentic-rag\">Agentic RAG</h3>\n<span class=\"paragraph\">Instead of a fixed retrieve-then-generate pipeline, let an agent <strong>decide</strong> what to retrieve.</span>\n<span class=\"paragraph\">The agent can:</span>\n<ul>\n<li><strong>Decide what</strong> to search for (reformulate based on what it already knows)</li>\n<li><strong>Decide when</strong> to search (maybe it already knows the answer)</li>\n<li><strong>Decide if</strong> results are good enough (if not, reformulate and retry)</li>\n<li><strong>Search multiple sources</strong> (vector store, BM25, web search, SQL)</li>\n</ul>\n<span class=\"paragraph\">This is the ReAct pattern from the agent-architectures notebook applied to RAG.</span>\n<blockquote>\n<span class=\"paragraph\">\"My Briefing Agent's research node is agentic RAG \u2014 it decides which source\n(arXiv, Reddit, Twitter) to query based on topic, and can retry with a refined\nquery if initial results are thin.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "11d57c6f96b6a2aa3ee1c23c45f8a441",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-5-multi-modal-rag\">Part 5: Multi-Modal RAG</h2>\n<span class=\"paragraph\"><strong>Standard RAG</strong>: text in, text out.\n<strong>Multi-modal RAG</strong>: handle images, tables, charts, PDFs with visual elements.</span>\n<span class=\"paragraph\"><strong>Why this matters</strong>: many real documents have critical information in figures,\ntables, and diagrams that text-only RAG completely misses.</span>\n<h3 id=\"three-approaches\">Three approaches</h3>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>How</th>\n<th>Best for</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Extract-and-embed</strong></td>\n<td>OCR tables, describe images with vision model, embed descriptions</td>\n<td>PDFs, structured docs</td>\n</tr>\n<tr>\n<td><strong>Native multi-modal embeddings</strong></td>\n<td>CLIP embeds images + text into same vector space</td>\n<td>Image-heavy corpora</td>\n</tr>\n<tr>\n<td><strong>Vision LLM at generation</strong></td>\n<td>Pass retrieved images/charts directly to GPT-4o/Claude</td>\n<td>High-value complex documents</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "80aad43dec94e376ccdf76a3cae9cb75",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"practical-implementation\">Practical Implementation</h3>\n<span class=\"paragraph\"><strong>For PDFs with tables</strong> (common in job descriptions, reports):</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">pdfplumber</span>\n<span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">camelot</span>\n\n<span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">extract_tables_as_markdown</span><span class=\"p\">(</span><span class=\"n\">pdf_path</span><span class=\"p\">:</span> <span class=\"nb\">str</span><span class=\"p\">)</span> <span class=\"o\">-&gt;</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">str</span><span class=\"p\">]:</span>\n    <span class=\"n\">tables</span> <span class=\"o\">=</span> <span class=\"n\">camelot</span><span class=\"o\">.</span><span class=\"n\">read_pdf</span><span class=\"p\">(</span><span class=\"n\">pdf_path</span><span class=\"p\">,</span> <span class=\"n\">pages</span><span class=\"o\">=</span><span class=\"s2\">&quot;all&quot;</span><span class=\"p\">)</span>\n    <span class=\"n\">markdown_tables</span> <span class=\"o\">=</span> <span class=\"p\">[]</span>\n    <span class=\"k\">for</span> <span class=\"n\">table</span> <span class=\"ow\">in</span> <span class=\"n\">tables</span><span class=\"p\">:</span>\n        <span class=\"n\">df</span> <span class=\"o\">=</span> <span class=\"n\">table</span><span class=\"o\">.</span><span class=\"n\">df</span>\n        <span class=\"n\">markdown_tables</span><span class=\"o\">.</span><span class=\"n\">append</span><span class=\"p\">(</span><span class=\"n\">df</span><span class=\"o\">.</span><span class=\"n\">to_markdown</span><span class=\"p\">(</span><span class=\"n\">index</span><span class=\"o\">=</span><span class=\"kc\">False</span><span class=\"p\">))</span>\n    <span class=\"k\">return</span> <span class=\"n\">markdown_tables</span>\n\n<span class=\"c1\"># Then: embed markdown tables alongside regular text chunks</span>\n<span class=\"c1\"># When retrieved, LLM can reason over the table structure</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>For images and charts</strong>:</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"k\">async</span> <span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">describe_image</span><span class=\"p\">(</span><span class=\"n\">image_path</span><span class=\"p\">:</span> <span class=\"nb\">str</span><span class=\"p\">,</span> <span class=\"n\">vision_llm</span><span class=\"p\">)</span> <span class=\"o\">-&gt;</span> <span class=\"nb\">str</span><span class=\"p\">:</span>\n    <span class=\"c1\"># Generate text description of the image</span>\n    <span class=\"n\">description</span> <span class=\"o\">=</span> <span class=\"k\">await</span> <span class=\"n\">vision_llm</span><span class=\"o\">.</span><span class=\"n\">generate</span><span class=\"p\">(</span>\n        <span class=\"sa\">f</span><span class=\"s2\">&quot;Describe this chart/image in detail, including all numerical values and trends.&quot;</span><span class=\"p\">,</span>\n        <span class=\"n\">image</span><span class=\"o\">=</span><span class=\"n\">image_path</span><span class=\"p\">,</span>\n    <span class=\"p\">)</span>\n    <span class=\"k\">return</span> <span class=\"n\">description</span>\n\n<span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">index_document_with_images</span><span class=\"p\">(</span><span class=\"n\">pdf_path</span><span class=\"p\">:</span> <span class=\"nb\">str</span><span class=\"p\">,</span> <span class=\"n\">vector_store</span><span class=\"p\">):</span>\n    <span class=\"n\">text_chunks</span> <span class=\"o\">=</span> <span class=\"n\">extract_text_chunks</span><span class=\"p\">(</span><span class=\"n\">pdf_path</span><span class=\"p\">)</span>\n    <span class=\"n\">image_descriptions</span> <span class=\"o\">=</span> <span class=\"p\">[</span>\n        <span class=\"p\">{</span><span class=\"s2\">&quot;text&quot;</span><span class=\"p\">:</span> <span class=\"n\">describe_image</span><span class=\"p\">(</span><span class=\"n\">img</span><span class=\"p\">),</span> <span class=\"s2\">&quot;image_path&quot;</span><span class=\"p\">:</span> <span class=\"n\">img</span><span class=\"p\">,</span> <span class=\"s2\">&quot;type&quot;</span><span class=\"p\">:</span> <span class=\"s2\">&quot;figure&quot;</span><span class=\"p\">}</span>\n        <span class=\"k\">for</span> <span class=\"n\">img</span> <span class=\"ow\">in</span> <span class=\"n\">extract_images</span><span class=\"p\">(</span><span class=\"n\">pdf_path</span><span class=\"p\">)</span>\n    <span class=\"p\">]</span>\n    <span class=\"c1\"># Store image path as metadata \u2014 pass original to multi-modal LLM at generation</span>\n    <span class=\"n\">all_chunks</span> <span class=\"o\">=</span> <span class=\"n\">text_chunks</span> <span class=\"o\">+</span> <span class=\"n\">image_descriptions</span>\n    <span class=\"n\">vector_store</span><span class=\"o\">.</span><span class=\"n\">add</span><span class=\"p\">(</span><span class=\"n\">all_chunks</span><span class=\"p\">)</span>\n</code></pre></div>\n<h3 id=\"when-multi-modal-matters\">When Multi-Modal Matters</h3>\n<table>\n<thead>\n<tr>\n<th>Document type</th>\n<th>What's lost by text-only RAG</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Job descriptions</td>\n<td>Salary tables, benefit comparison charts, org chart images</td>\n</tr>\n<tr>\n<td>Research papers</td>\n<td>Figures, result tables, architecture diagrams \u2014 often the most important parts</td>\n</tr>\n<tr>\n<td>Business documents</td>\n<td>Financial charts, process diagrams, dashboards</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\">\"For Canopy, most JDs are text-heavy \u2014 multi-modal isn't critical yet. For the\nBriefing Agent processing arXiv papers, extracting figure descriptions would\ncapture key results that abstracts miss.\"</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "8b45507e4d76eb1c50a6774c40b1a098",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-6-rag-evaluation-frameworks\">Part 6: RAG Evaluation Frameworks</h2>\n<h3 id=\"the-evaluation-problem\">The Evaluation Problem</h3>\n<span class=\"paragraph\">RAG has <strong>two independent components</strong> to evaluate:</span>\n<table>\n<thead>\n<tr>\n<th>Component</th>\n<th>Measures</th>\n<th>How it fails</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Retrieval quality</strong></td>\n<td>Did I find the right documents?</td>\n<td>Low precision: noisy context. Low recall: missed relevant docs.</td>\n</tr>\n<tr>\n<td><strong>Generation quality</strong></td>\n<td>Given those docs, did I generate a good answer?</td>\n<td>Hallucination, ignored context, wrong format.</td>\n</tr>\n</tbody>\n</table>\n<div class=\"language-text codehilite\"><pre><span></span><code>Bad retrieval + Good generation  \u2192  confident wrong answer (hallucination from noise)\nGood retrieval + Bad generation  \u2192  wasted potential (had the info, didn&#39;t use it)\n</code></pre></div>\n<span class=\"paragraph\">You must evaluate <strong>both independently</strong> to know where to improve.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "7e0aad5c6f21e48ea31bc8944310f06d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"ragas-metrics\">RAGAS Metrics</h3>\n<table>\n<thead>\n<tr>\n<th>Metric</th>\n<th>Question it answers</th>\n<th>How it's computed</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Faithfulness</strong></td>\n<td>Is the answer grounded in the context?</td>\n<td>Claims in answer \u00f7 claims supported by context</td>\n</tr>\n<tr>\n<td><strong>Answer relevance</strong></td>\n<td>Does the answer address the question?</td>\n<td>Embed reverse-generated questions, compare to original</td>\n</tr>\n<tr>\n<td><strong>Context precision</strong></td>\n<td>Are retrieved chunks actually useful?</td>\n<td>Relevant chunks \u00f7 total chunks retrieved</td>\n</tr>\n<tr>\n<td><strong>Context recall</strong></td>\n<td>Did we retrieve everything needed?</td>\n<td>Requires ground-truth source list</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "d0b74be079b4d68ca6549e96f8dcd85c",
       "outputs": [],
       "console": []
     },
     {
-      "id": "9eNS",
-      "code_hash": "cf34582be6bb59194f50043961bbbdcd",
+      "id": "ecfG",
+      "code_hash": "f00413ecdcaaad2c08e34cc5889f42e5",
       "outputs": [],
       "console": []
     },
     {
-      "id": "169T",
-      "code_hash": "17b8d3907d388997bb44ce6b6bf8409f",
-      "outputs": [],
+      "id": "Pvdt",
+      "code_hash": "d3a3007d5b50ea2429bcc5fb4685c3f4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"evaluation-framework-options\">Evaluation Framework Options</h3>\n<table>\n<thead>\n<tr>\n<th>Framework</th>\n<th>Strengths</th>\n<th>Best for</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>RAGAS</strong></td>\n<td>Standard metrics, LLM-as-judge, well documented</td>\n<td>General RAG evaluation</td>\n</tr>\n<tr>\n<td><strong>TruLens</strong></td>\n<td>Production monitoring, feedback functions</td>\n<td>Live system monitoring</td>\n</tr>\n<tr>\n<td><strong>DeepEval</strong></td>\n<td>CI/CD integration, assertion-based</td>\n<td>Testing in pipelines</td>\n</tr>\n<tr>\n<td><strong>Promptfoo</strong></td>\n<td>Prompt A/B testing, provider comparison</td>\n<td>Comparing prompt versions</td>\n</tr>\n<tr>\n<td><strong>Custom (above)</strong></td>\n<td>Full control, domain-specific metrics</td>\n<td>When standard metrics don't fit</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Run in CI</strong>: every change to retrieval config or system prompt should trigger the eval suite.\nA 5-point drop in faithfulness is a regression, same as a failing unit test.</span></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
-      "id": "cPS0",
-      "code_hash": "3214f398881948506c23cd449a35fc78",
-      "outputs": [],
+      "id": "ZBYS",
+      "code_hash": "9277c6ca70475b429a7c001ba76939af",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"the-full-advanced-rag-architecture\">The Full Advanced RAG Architecture</h2>\n<div class=\"language-ini codehilite\"><pre><span></span><code><span class=\"k\">[User Query]</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Query Router]  (simple query? skip rewriting. Complex? continue.)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Query Rewriting \u2014 parallel]</span>\n<span class=\"w\">        </span><span class=\"na\">\u251c\u2500\u2500 Query expansion     (3 LLM-generated variants)</span>\n<span class=\"w\">        </span><span class=\"na\">\u251c\u2500\u2500 Step-back query     (1 broader LLM-generated query)</span>\n<span class=\"w\">        </span><span class=\"na\">\u2514\u2500\u2500 HyDE                (1 LLM-generated hypothetical document)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Multi-Source Retrieval \u2014 parallel]</span>\n<span class=\"w\">        </span><span class=\"na\">\u251c\u2500\u2500 Dense search        (all rewritten + original queries)</span>\n<span class=\"w\">        </span><span class=\"na\">\u251c\u2500\u2500 Sparse search       (BM25 on original query)</span>\n<span class=\"w\">        </span><span class=\"na\">\u2514\u2500\u2500 Metadata pre-filter (location, date, job type, etc.)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [RRF Fusion]              (merge all result lists into one ranked list)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Cross-Encoder Reranking] (top 50 \u2192 top 5, precise joint scoring)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Context Compression]     (optional</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"s\">summarize long chunks if &gt; context window)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Generation]              (LLM with structured output + inline citations)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Faithfulness Check]      (verify every claim is supported by retrieved context)</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 [Response]</span>\n\n<span class=\"na\">\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</span>\n\n<span class=\"k\">[Evaluation Pipeline \u2014 runs in CI on every retrieval or prompt change]</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 RAGAS metrics on 100+ test cases</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 A/B testing on query rewriting variants</span>\n<span class=\"w\">    </span><span class=\"na\">\u2192 Latency regression check (p95 &lt; 2s)</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>Implementation priority for Canopy</strong> (ordered by ROI):</span>\n<ol>\n<li>Cross-encoder reranking \u2014 ~50 lines, 10-20% recall improvement</li>\n<li>Hybrid search (BM25 + dense + RRF) \u2014 from vector-databases notebook</li>\n<li>Query expansion \u2014 handles vocabulary mismatch on short queries</li>\n<li>RAGAS eval suite \u2014 can't improve what you don't measure</li>\n<li>HyDE \u2014 for ambiguous queries only, combined with direct retrieval</li>\n</ol></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
-      "id": "osDj",
-      "code_hash": "d936e2af12753a260dd73478877e651e",
-      "outputs": [],
+      "id": "aLJB",
+      "code_hash": "80d1c0c9aa915c29b888da391fa1c79a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>Answer</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>What's query rewriting?</strong></td>\n<td>Use an LLM to expand or reformulate the query before retrieval. Captures synonyms and implicit intent the raw query misses.</td>\n</tr>\n<tr>\n<td><strong>What's HyDE?</strong></td>\n<td>Generate a hypothetical answer with an LLM, embed THAT instead of the query. Works because hypothetical is in document-space. Risk: wrong hypothetical \u2192 wrong retrieval.</td>\n</tr>\n<tr>\n<td><strong>Why rerank?</strong></td>\n<td>Retrieval optimizes speed (bi-encoder, separate encoding). Reranking optimizes precision (cross-encoder, joint scoring). Typical 10-20% recall@5 improvement.</td>\n</tr>\n<tr>\n<td><strong>What's contextual retrieval?</strong></td>\n<td>Prepend document-level context to each chunk before embedding. Prevents chunks from losing meaning outside their parent document. Done at index time.</td>\n</tr>\n<tr>\n<td><strong>What's parent-child retrieval?</strong></td>\n<td>Index small chunks (256 tokens) for precise matching, return parent chunks (1024 tokens) for rich context. Best of both granularities.</td>\n</tr>\n<tr>\n<td><strong>How do you evaluate RAG?</strong></td>\n<td>Separately evaluate retrieval (precision, recall) and generation (faithfulness, relevance). RAGAS framework. Run in CI on every change.</td>\n</tr>\n<tr>\n<td><strong>Faithfulness vs relevance?</strong></td>\n<td>Faithfulness = answer is grounded in context (no hallucination). Relevance = answer addresses the question asked. Both can fail independently.</td>\n</tr>\n<tr>\n<td><strong>Multi-modal RAG?</strong></td>\n<td>Extract tables/images as text descriptions, embed alongside text chunks. Pass originals to multi-modal LLM at generation time.</td>\n</tr>\n<tr>\n<td><strong>RRF \u2014 what and why?</strong></td>\n<td>Reciprocal Rank Fusion. Merges multiple ranked lists: score = \u03a3 1/(60+rank). Robust to scale differences across retrieval methods.</td>\n</tr>\n<tr>\n<td><strong>Step-back prompting?</strong></td>\n<td>Generate a broader version of the specific query, retrieve for both, merge. Captures context the specific query would miss.</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
       "console": []
     },
     {
-      "id": "UORH",
-      "code_hash": "d5ffd574d71e929455b09bcfc8e31191",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "6x4W",
-      "code_hash": "8d6be2959d0c235f1b8419e17a05f056",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "tdSC",
-      "code_hash": "5786fd85d6a3f73269271fffa22c1ec2",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "ye4p",
-      "code_hash": "a4d207413d415ff966b8500df1b20f71",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "DTko",
-      "code_hash": "455d04e287debdebc97ecaa7a0dab4c3",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "FyLr",
-      "code_hash": "60eba4cd5ec313765e4ed6e542c237e2",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "Ws2Z",
-      "code_hash": "1e73ea5e3d9775123793988ebe334ebb",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "SQsu",
-      "code_hash": "f9a3aa939bbab3b7fb26ac79c35c4871",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "8BcC",
-      "code_hash": "4063f86012f1218547788c2da3132513",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "Kjwc",
-      "code_hash": "144c96a92d2cd0fe56775bbfefe22246",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "CwqG",
-      "code_hash": "40d0e167415d0f8ec7235a57942a20dc",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "xuZh",
-      "code_hash": "590852972682db46059c60f350cb16ab",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "12WB",
-      "code_hash": "f40dcf11e5464f3fd34c3f23ad016041",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "0ntd",
-      "code_hash": "4ab3526cce48dd6de4793834db19425d",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "DkQQ",
-      "code_hash": "bf4bcb1036b81977f15fc1106472479a",
-      "outputs": [],
+      "id": "nHfw",
+      "code_hash": "5bd9e72fa4b90402391548796bdd32ad",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<span class=\"paragraph\"><strong>\"How would you improve a basic RAG system?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"Three highest-ROI additions in order: cross-encoder reranking (10-20% recall improvement\nfor ~100ms latency cost), hybrid retrieval with BM25 + dense + RRF (catches keyword matches\ndense search misses), and query rewriting for ambiguous queries. Reranking first \u2014 simplest\nto add, biggest impact. I'd also add a RAGAS eval suite before touching anything, so I have\na baseline to measure against.\"</span>\n</blockquote>\n<hr />\n<span class=\"paragraph\"><strong>\"When would you use HyDE?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"For complex queries where vocabulary mismatch is the main failure mode \u2014 factual questions\nabout a specific domain where the LLM knows the terminology. I'd always combine HyDE with\ndirect query retrieval via RRF \u2014 so if the hypothetical is wrong, direct retrieval still\ncontributes. Never HyDE alone. And I'd A/B test it against the baseline before shipping.\"</span>\n</blockquote>\n<hr />\n<span class=\"paragraph\"><strong>\"How do you evaluate your RAG system?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">\"RAGAS metrics: faithfulness (is the answer grounded?), context precision (is retrieval\nfocused?), context recall (did we find what we needed?), answer relevance (does it address\nthe question?). 100+ eval cases curated from real usage. Every retrieval config or prompt\nchange triggers the suite in CI. A 5-point drop in faithfulness is a regression, same\nas a failing unit test.\"</span>\n</blockquote>\n<hr />\n<span class=\"paragraph\"><strong>Connection to my work</strong>\nMy Week 3 RAG system design notebook specified the architecture. My vector-databases notebook\ncovered hybrid retrieval with RRF. This notebook fills in the techniques: query rewriting,\nHyDE, reranking, and eval. Canopy currently uses basic dense retrieval \u2014 adding reranking\nand a RAGAS eval suite would move it from demo quality to production quality. The eval\nharness above (<code>RAGEvalPipeline</code>) is directly portable into Canopy.</span></span>"
+          }
+        }
+      ],
       "console": []
     }
   ]

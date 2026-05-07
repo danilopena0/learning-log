@@ -1,0 +1,416 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.22.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "5bc2b9a94c728f7bb1eb763058ba9130",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"inspecting-what-drives-model-decisions-shap-feature-importance-partial-dependence-attention-debugging\">Inspecting What Drives Model Decisions \u2014 SHAP, Feature Importance, Partial Dependence, Attention, Debugging</h1>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Date</td>\n<td>2026-04-30</td>\n</tr>\n<tr>\n<td>Track</td>\n<td>ML Theory</td>\n</tr>\n<tr>\n<td>Time</td>\n<td>60 min</td>\n</tr>\n<tr>\n<td>Topics</td>\n<td>Feature Importance \u00b7 Permutation Importance \u00b7 SHAP \u00b7 PDP/ICE \u00b7 Interpretability Debugging</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "c0662f0090178a87e858728d5a797fd8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"why-interpretability-matters\">Why Interpretability Matters</h2>\n<span class=\"paragraph\">Interpretability isn't optional. Three audiences demand it for very different reasons:</span>\n<span class=\"paragraph\"><strong>1. You (the builder) \u2014 debugging</strong></span>\n<span class=\"paragraph\">Is the model learning signal or memorizing noise? Are the <em>right</em> features driving predictions?\nA model that gets 90% accuracy because it learned a spurious correlation with your data\npipeline artifact will collapse in production the moment that artifact changes.\nYou can't catch this without looking inside.</span>\n<span class=\"paragraph\"><strong>2. Stakeholders \u2014 trust</strong></span>\n<span class=\"paragraph\">\"Why did the model reject this loan?\" A black box that can't explain itself won't be\ndeployed in any organization with accountability structures. Product managers, executives,\nand customers all need explanations \u2014 not probability scores.</span>\n<span class=\"paragraph\"><strong>3. Regulators \u2014 compliance</strong></span>\n<span class=\"paragraph\">GDPR's \"right to explanation\" requires that automated decisions can be explained in plain\nlanguage. Financial regulators require model documentation. Healthcare requires clinical\njustification. In these domains, an unexplainable model is an unusable model.</span>\n<hr />\n<h3 id=\"the-interpretability-accuracy-trade-off-is-mostly-a-myth\">The interpretability-accuracy trade-off is mostly a myth</h3>\n<span class=\"paragraph\">The common framing \u2014 \"accuracy OR interpretability, not both\" \u2014 is outdated.\nSHAP gives you interpretability <em>on top of</em> complex models. You don't sacrifice accuracy.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"In my fraud detection system design, I chose XGBoost partly because SHAP gives\nhuman-readable reason codes for declines. A neural net might score 1% better but\ncan't explain itself to regulators. That 1% isn't worth the compliance risk.\"</em></span>\n</blockquote>\n<hr />\n<h3 id=\"the-interpretability-toolkit\">The interpretability toolkit</h3>\n<table>\n<thead>\n<tr>\n<th>Method</th>\n<th>Model scope</th>\n<th>What it answers</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Coefficients</td>\n<td>Linear models only</td>\n<td>Feature direction + magnitude</td>\n</tr>\n<tr>\n<td>Impurity importance</td>\n<td>Trees only</td>\n<td>Which features are split on most?</td>\n</tr>\n<tr>\n<td>Permutation importance</td>\n<td>Any model</td>\n<td>Which features matter on held-out data?</td>\n</tr>\n<tr>\n<td>SHAP</td>\n<td>Any (fast for trees)</td>\n<td>Why did THIS specific prediction happen?</td>\n</tr>\n<tr>\n<td>PDP / ICE</td>\n<td>Any model</td>\n<td>How does prediction change as X varies?</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "b3bbd746e2299d2c44209988e0e550df",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "17df791e1597809547fb92093a94e536",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "b0d6ba3590b9dec0e288b23b61bc8f2a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-1-built-in-feature-importance-quick-dirty\">Part 1: Built-in Feature Importance (Quick &amp; Dirty)</h2>\n<span class=\"paragraph\">Every model family has a \"native\" way to rank features \u2014 but each has different assumptions\nand failure modes. Know what you're measuring before you trust the numbers.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "bfdb0e5b99ec18f1341fed1b681c4898",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "064a523a70108399e7c07319c6d8c9fb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Reading LR coefficients:</strong></span>\n<ul>\n<li>Positive (green) = pushes toward good fit. Negative (red) = pushes away.</li>\n<li>Noise features should cluster near zero.</li>\n</ul>\n<span class=\"paragraph\"><strong>The scaling trap:</strong> coefficients are only comparable if features are standardized.\nWith raw features, <code>skill_match_pct</code> (range 30\u2013100) appears unimportant because each\nunit change is small numerically. After scaling, coefficient = importance <em>per\nstandard-deviation change</em>. Now the features are on equal footing.</span>\n<span class=\"paragraph\"><strong>Limitation:</strong> logistic regression assumes a linear relationship. If <code>years_experience</code>\nhas diminishing returns (experience helps 0\u201310 years, then plateaus), a single coefficient\nmisses all of that. Use PDP or SHAP to detect nonlinearity.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "cafba9f6bb724465d888735b3688080b",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "c34228f7756c460c40c0a242158191af",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "47bdcca42bd21faf31f5dfcbd321c52e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>What impurity importance measures:</strong> total reduction in Gini/entropy from all splits\non this feature, summed across all trees.</span>\n<span class=\"paragraph\"><strong>Trap 1 \u2014 no direction.</strong> Does more <code>years_experience</code> <em>help</em> or <em>hurt</em>? Impurity\nimportance doesn't say. You need SHAP or LR coefficients for direction.</span>\n<span class=\"paragraph\"><strong>Trap 2 \u2014 cardinality bias.</strong> <code>description_length</code> (continuous, many unique values) gets\nmore split opportunities than <code>location_match</code> (binary). The model shops around for good\nthresholds on high-cardinality features, artificially inflating their importance.</span>\n<span class=\"paragraph\"><strong>Trap 3 \u2014 training data only.</strong> If the model overfits to training noise, noise features\nrank higher than they deserve on held-out data.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"Impurity importance is the default. Quick, but misleading in all three ways above.\nUse permutation importance or SHAP for any real analysis.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "cab73e720536c14c7ab8bf2d300ba4ea",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-2-permutation-importance-model-agnostic-reliable\">Part 2: Permutation Importance \u2014 Model-Agnostic, Reliable</h2>\n<span class=\"paragraph\"><strong>Algorithm:</strong> shuffle one feature column \u2192 measure how much worse the model gets.\nBigger accuracy drop = more important. The feature was doing real work; destroying it hurt.</span>\n<span class=\"paragraph\"><strong>Why it's better than impurity importance:</strong></span>\n<ul>\n<li>Works for <em>any</em> model, not just trees</li>\n<li>Not biased by cardinality \u2014 shuffling doesn't advantage high-cardinality features</li>\n<li>Measured on <em>validation data</em>, so training-set overfitting doesn't inflate noise importance</li>\n</ul>\n<span class=\"paragraph\"><strong>Limitation \u2014 correlated features:</strong> if <code>skill_match_pct</code> and <code>years_experience</code> are\ncorrelated, shuffling one doesn't hurt much because the model compensates with the other.\nBoth get lower importance than they deserve individually. When features are correlated,\nSHAP handles marginal contributions more carefully.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "f9dbc455d64c47d0fde61c517387d3d8",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "c8412d21c8791d38bb3f457e817e5ca8",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "a328c4eca7801ce1d8ab5681924a2e51",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "772ec4cfd90a8ec748546ea041276abb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>When they disagree:</strong> impurity importance overcounts high-cardinality features like\n<code>company_size</code> and <code>description_length</code> \u2014 the model had more split opportunities on them\nduring training. Permutation importance measures actual predictive value on held-out data.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"When impurity and permutation importance disagree, trust permutation.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "b3de2b314630dd81de1da1ef13406ee0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-3-shap-the-gold-standard\">Part 3: SHAP \u2014 The Gold Standard</h2>\n<span class=\"paragraph\">SHAP (SHapley Additive exPlanations) answers the question neither coefficients nor\nimportance scores can: <strong>\"For THIS specific prediction, how much did each feature contribute?\"</strong></span>\n<span class=\"paragraph\"><strong>From game theory:</strong> Shapley values fairly distribute a \"payout\" (the prediction) among\n\"players\" (the features). Each feature gets credit proportional to its contribution,\naveraged over all possible orderings \u2014 the only allocation that satisfies fairness.</span>\n<h3 id=\"three-guarantees-that-make-shap-trustworthy\">Three guarantees that make SHAP trustworthy</h3>\n<ul>\n<li>\n<span class=\"paragraph\"><strong>Additivity:</strong> SHAP values sum to <code>prediction \u2212 baseline</code>. No information lost.</span>\n<blockquote>\n<span class=\"paragraph\">\u0177\u1d62 = base_value + \u03a3 SHAP(feature\u2c7c, sample\u1d62)</span>\n</blockquote>\n</li>\n<li><strong>Consistency:</strong> if a feature's contribution increases, its SHAP value never decreases.</li>\n<li><strong>Fairness:</strong> rooted in game theory \u2014 the only method satisfying all three axioms.</li>\n</ul>\n<h3 id=\"three-levels-of-analysis\">Three levels of analysis</h3>\n<ol>\n<li><strong>Local</strong> \u2014 explain ONE prediction: \"Why did this job score 73%?\"</li>\n<li><strong>Global</strong> \u2014 explain the MODEL overall: \"Which features matter across all predictions?\"</li>\n<li><strong>Interaction</strong> \u2014 \"Which feature <em>combinations</em> matter?\"</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "7797fcfeca241abfe66f7c260bd448aa",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "1cfcb7d0e774efbf873b43c01791e69b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>How TreeExplainer works:</strong> for tree models, SHAP values are computed exactly in\nO(TLD\u00b2) time (T=trees, L=leaves, D=depth) \u2014 far faster than naive Shapley computation\nwhich is exponential in features. This is why SHAP + XGBoost is the practical gold\nstandard for tabular ML interpretability.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "4887fc0d0d28eef28f27dc3b5630c320",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "7c4f8163587248a607bd9d95835e1bdd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>This is what you'd show a stakeholder:</strong></span>\n<blockquote>\n<span class=\"paragraph\"><em>\"This candidate scored 73% match probability. The biggest positive driver was skill\nalignment \u2014 94% skill match added +0.41. Location matched, adding +0.38. Nine years of\nexperience was right for the role (+0.25). The posting is 37 days old, suggesting lower\nurgency or difficulty filling the role (-0.12). Salary mismatch pulled the score down\nslightly (-0.18). Every number here is traceable back to the model calculation.\"</em></span>\n</blockquote>\n<span class=\"paragraph\">No hand-waving. Every contribution sums to the prediction. Auditable.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "e989df386b56f8119cc16a3255cb1a89",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "4f7b77299753aa1446ab3730b2c1f6e5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>How to read the SHAP summary plot:</strong></span>\n<ul>\n<li><code>skill_match_pct</code>: red dots (high values) cluster on the right (positive SHAP) \u2192\n  high skill match drives the prediction UP. Expected.</li>\n<li><code>location_match</code> (binary): two clusters. Red (location=1) on right, blue (0) on left.</li>\n<li><code>salary_fit</code>: red dots (large mismatch) cluster on the <em>left</em> \u2192 mismatch hurts.</li>\n<li>Noise features: dots centered near zero with no color pattern \u2192 no signal.</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><em>\"The SHAP summary plot is the single most informative model visualization I know of.\nIt shows importance, direction, AND magnitude for every feature in one chart. I include\nthis in every model documentation I write.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "80892e4b01d51b1d2005167e474b032a",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "92696ca5ec90b0a6ae6ba4c6526555bb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Reading dependence plots:</strong></span>\n<span class=\"paragraph\">Left panel: nonlinear effect of experience \u2014 steep gain 0\u20138 years, diminishing returns\nafter that. A single coefficient would miss this entirely.</span>\n<span class=\"paragraph\">Right panel: the same experience level has higher SHAP values when job level is a good\nmatch. High experience + senior role = big positive. High experience + junior role =\nsmaller (or negative: \"overqualified\") contribution.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"Dependence plots reveal nonlinear relationships and interactions the model learned.\nThis is how you discover 'the model penalizes overqualification for junior roles' \u2014\nsomething invisible in coefficient or importance tables.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "b7a8632dc03637a3cdadbb000c3182c9",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "934b500b325233ec52975db9ac3ccc05",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>SHAP makes data leakage visible.</strong></span>\n<span class=\"paragraph\">The telltale signature: one feature has mean |SHAP| 5\u201310\u00d7 larger than everything else.\nNothing in real data generates information that cleanly \u2014 it's almost always a pipeline\nartifact: target-encoded column that leaked, a timestamp batch-correlated with labels,\na derived column computed from the target.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"If I'd deployed that model without a SHAP check, I'd have discovered the leakage\nthe hard way. SHAP makes it visible in 30 seconds.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "082af2f5c251fec7e39ddc63ac8ab105",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-4-partial-dependence-plots-model-agnostic-marginal-effects\">Part 4: Partial Dependence Plots \u2014 Model-Agnostic Marginal Effects</h2>\n<span class=\"paragraph\"><strong>PDP answers:</strong> \"How does the model's <em>average</em> prediction change as I vary one feature,\nholding everything else fixed?\"</span>\n<span class=\"paragraph\"><strong>Algorithm</strong> (implement it yourself once and you'll never forget it):</span>\n<ol>\n<li>Choose a feature. Create a grid of 50 evenly-spaced values across its range.</li>\n<li>For each grid value: replace that feature in ALL test samples with that value.</li>\n<li>Predict on the modified dataset. Take the average predicted probability.</li>\n<li>Plot: grid value (x) vs average predicted probability (y).</li>\n</ol>\n<span class=\"paragraph\"><strong>PDP vs SHAP dependence:</strong></span>\n<ul>\n<li>PDP averages over the full data distribution \u2192 shows the marginal effect, hides interactions</li>\n<li>SHAP dependence shows per-sample contributions \u2192 reveals interactions</li>\n<li>If ICE lines cross (see below), the PDP average is hiding a real interaction</li>\n</ul>\n<span class=\"paragraph\"><strong>Limitation:</strong> PDP can create unrealistic feature combinations during averaging\n(e.g., high experience paired with entry-level salary). SHAP handles this better by\nconditioning on realistic data distributions.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "8e0ba469d00235841fa7677f52e82ce9",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "a31b3aa8018bc1f218207e64d6d071a1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>What to read from these PDPs:</strong></span>\n<ul>\n<li><code>years_experience</code>: probability rises steeply, then plateaus \u2014 diminishing returns.</li>\n<li><code>skill_match_pct</code>: steep positive slope \u2014 the most monotonically impactful feature.</li>\n<li><code>salary_fit</code>: near-zero mismatch scores highest; larger mismatch in either direction hurts.</li>\n<li><code>location_match</code> (binary): sharp jump from 0 to 1.</li>\n<li><code>posting_age_days</code>: slight negative slope \u2014 older postings correlate with lower fit probability.</li>\n<li>Noise features: flat or near-flat curves (model learned little from them).</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "a43ec0aa628716fcee7a589d4b9a4121",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "4f95afb8088913fa907d21ae878cd080",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>ICE vs PDP:</strong></span>\n<span class=\"paragraph\">The PDP shows the average effect. ICE shows each individual sample's response curve.\nIf ICE lines cross each other, there's a hidden interaction: the direction of the effect\ndepends on other feature values for that sample.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"Always check ICE when PDP looks flat. Flatness might mean 'half the samples go up,\nhalf go down, and they cancel.' That's a completely different story than 'this feature\ndoesn't matter.'\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "967b01de341504af3818ad106d20fd29",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-5-model-specific-inspection-techniques\">Part 5: Model-Specific Inspection Techniques</h2>\n<h3 id=\"attention-visualization-transformers-conceptual\">Attention Visualization (Transformers) \u2014 Conceptual</h3>\n<span class=\"paragraph\">Not coding this (requires a full transformer), but critical to know:</span>\n<ul>\n<li><strong>Attention weights</strong> show which input tokens each output token \"looked at\"</li>\n<li>Tools: BertViz, Ecco, <code>model.get_attention_weights()</code> on HuggingFace models</li>\n<li>Useful diagnostic for NLP: \"which words in this job description drove the embedding?\"</li>\n</ul>\n<span class=\"paragraph\"><strong>Important limitation:</strong> attention \u2260 importance.\nHigh attention means \"the model looked here,\" not \"this token drove the output.\"\nResearch has shown attention can be adversarially manipulated without changing predictions.\nSHAP on the downstream task is more actionable.</span>\n<blockquote>\n<span class=\"paragraph\"><em>\"In Canopy, I could extract attention from the sentence-transformer to see which\nwords the embedding model focuses on. But SHAP on the downstream job scorer is\nmore actionable for debugging why a specific candidate scored unexpectedly.\"</em></span>\n</blockquote>\n<hr />\n<h3 id=\"logistic-regression-full-prediction-audit\">Logistic Regression: Full Prediction Audit</h3>\n<span class=\"paragraph\">LR is the <em>only</em> common model with zero-approximation, complete prediction decomposition.\nEvery prediction is an exact documented sum.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "3542cf2986309acdfd699b1ce77fc6fd",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "f5529bf073f67b1e4a42244327190e20",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Why regulators love logistic regression:</strong></span>\n<span class=\"paragraph\">Every prediction is a fully documented calculation:\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>log-odds = intercept\n\n        + 0.41 \u00d7 years_experience_scaled\n\n        + 0.63 \u00d7 skill_match_pct_scaled\n\n        + (\u22120.38) \u00d7 salary_fit_scaled\n\n        + ...\nP(good_fit) = sigmoid(log-odds)\n</code></pre></div>\nNo approximation. No game theory. This is exactly what was computed \u2014 legally defensible,\nfully auditable. This is why logistic regression remains the first choice in credit scoring,\nclinical risk models, and any regulated domain: not accuracy, but accountability.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "03b1f9e5f18ccaaaaa929532b6a4bc28",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"part-6-debugging-models-with-interpretability\">Part 6: Debugging Models with Interpretability</h2>\n<div class=\"language-teratermmacro codehilite\"><pre><span></span><code><span class=\"nv\">Model</span><span class=\"w\"> </span><span class=\"nv\">is</span><span class=\"w\"> </span><span class=\"nv\">underperforming</span>.<span class=\"w\"> </span><span class=\"nv\">Diagnostic</span><span class=\"w\"> </span><span class=\"nv\">workflow</span>:\n\n<span class=\"mi\">1</span>.<span class=\"w\"> </span><span class=\"nv\">Permutation</span><span class=\"w\"> </span><span class=\"nv\">importance</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">are</span><span class=\"w\"> </span><span class=\"nv\">the</span><span class=\"w\"> </span><span class=\"nv\">right</span><span class=\"w\"> </span><span class=\"nv\">features</span><span class=\"w\"> </span><span class=\"nv\">being</span><span class=\"w\"> </span><span class=\"nv\">used</span>?\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"nv\">Noise</span><span class=\"w\"> </span><span class=\"nv\">features</span><span class=\"w\"> </span><span class=\"nv\">rank</span><span class=\"w\"> </span><span class=\"nv\">high</span>?<span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">data</span><span class=\"w\"> </span><span class=\"nv\">quality</span><span class=\"w\"> </span><span class=\"nv\">issue</span><span class=\"w\"> </span><span class=\"nv\">or</span><span class=\"w\"> </span><span class=\"nv\">leakage</span>\n\n<span class=\"mi\">2</span>.<span class=\"w\"> </span><span class=\"nv\">SHAP</span><span class=\"w\"> </span><span class=\"nv\">summary</span><span class=\"w\"> </span><span class=\"nv\">plot</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"k\">do</span><span class=\"w\"> </span><span class=\"nv\">directions</span><span class=\"w\"> </span><span class=\"nv\">make</span><span class=\"w\"> </span><span class=\"nv\">sense</span>?\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"s2\">&quot;More experience = lower score&quot;</span>?<span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">label</span><span class=\"w\"> </span><span class=\"nv\">error</span><span class=\"w\"> </span><span class=\"nv\">or</span><span class=\"w\"> </span><span class=\"nv\">confounded</span><span class=\"w\"> </span><span class=\"nv\">feature</span>\n\n<span class=\"mi\">3</span>.<span class=\"w\"> </span><span class=\"nv\">SHAP</span><span class=\"w\"> </span><span class=\"nv\">on</span><span class=\"w\"> </span><span class=\"nv\">worst</span><span class=\"w\"> </span><span class=\"nv\">predictions</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">what</span><span class=\"w\"> </span><span class=\"nv\">drove</span><span class=\"w\"> </span><span class=\"nv\">the</span><span class=\"w\"> </span><span class=\"nv\">biggest</span><span class=\"w\"> </span><span class=\"nv\">mistakes</span>?\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"nv\">One</span><span class=\"w\"> </span><span class=\"nv\">feature</span><span class=\"w\"> </span><span class=\"nv\">dominated</span>?<span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">outlier</span>,<span class=\"w\"> </span><span class=\"nv\">data</span><span class=\"w\"> </span><span class=\"nv\">error</span>,<span class=\"w\"> </span><span class=\"nv\">or</span><span class=\"w\"> </span><span class=\"nv\">leakage</span>\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"nv\">Contradictory</span><span class=\"w\"> </span><span class=\"nv\">SHAP</span><span class=\"w\"> </span><span class=\"nv\">patterns</span>?<span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">label</span><span class=\"w\"> </span><span class=\"nv\">noise</span>\n\n<span class=\"mi\">4</span>.<span class=\"w\"> </span><span class=\"nv\">PDP</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"nv\">ICE</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">unexpected</span><span class=\"w\"> </span><span class=\"nv\">relationships</span>?\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"nv\">Flat</span><span class=\"w\"> </span><span class=\"nv\">PDP</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"nv\">crossing</span><span class=\"w\"> </span><span class=\"nv\">ICE</span><span class=\"w\"> </span><span class=\"nv\">lines</span><span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">hidden</span><span class=\"w\"> </span><span class=\"nv\">interaction</span>\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"nv\">Non</span><span class=\"o\">-</span><span class=\"nv\">monotonic</span><span class=\"w\"> </span><span class=\"nv\">where</span><span class=\"w\"> </span><span class=\"nv\">monotonic</span><span class=\"w\"> </span><span class=\"nv\">expected</span><span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">data</span><span class=\"w\"> </span><span class=\"nv\">quality</span><span class=\"w\"> </span><span class=\"nv\">issue</span>\n\n<span class=\"mi\">5</span>.<span class=\"w\"> </span><span class=\"nv\">Calibration</span><span class=\"w\"> </span><span class=\"nv\">check</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"nv\">from</span><span class=\"w\"> </span><span class=\"nv\">validation</span><span class=\"w\"> </span><span class=\"nv\">notebook</span><span class=\"ss\">)</span>\n<span class=\"w\">   </span>\u2514\u2500\u2500<span class=\"w\"> </span><span class=\"nv\">Model</span><span class=\"w\"> </span><span class=\"nv\">says</span><span class=\"w\"> </span><span class=\"mi\">80</span><span class=\"o\">%</span><span class=\"w\"> </span><span class=\"nv\">but</span><span class=\"w\"> </span><span class=\"nv\">right</span><span class=\"w\"> </span><span class=\"nv\">only</span><span class=\"w\"> </span><span class=\"mi\">50</span><span class=\"o\">%</span>?<span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">overconfident</span>,<span class=\"w\"> </span><span class=\"nv\">needs</span><span class=\"w\"> </span><span class=\"nv\">Platt</span><span class=\"w\"> </span><span class=\"nv\">scaling</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "e0eb1e735c0a25e892773132f6a3448c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "90176f66872ef56983727bba0ca84120",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>What the analysis revealed:</strong></span>\n<ol>\n<li><strong>Feature importance didn't change.</strong> The same features rank highest \u2014 the model still\n   learned the true signal. This tells us the issue isn't a feature quality problem.</li>\n<li><strong>Misclassified samples have more mixed SHAP patterns for <code>skill_match_pct</code>.</strong> High\n   skill match <em>should</em> produce a positive SHAP value. For misclassified samples, the\n   distribution is more spread \u2014 some have positive SHAP but the label says \"bad fit.\"\n   That's the injected noise.</li>\n<li><strong>Diagnosis:</strong> label noise, not bad features. Fix: audit high-confidence misclassifications\n   (samples where the model is very confident but the label disagrees).</li>\n</ol>\n<blockquote>\n<span class=\"paragraph\"><em>\"This is the real power of interpretability: not just explaining predictions, but\nFINDING problems in your data pipeline before they reach production.\"</em></span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "dab77b3cd38b73bd65c1f25b2d01a0fe",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interpretability-decision-framework\">Interpretability Decision Framework</h2>\n<table>\n<thead>\n<tr>\n<th>Need</th>\n<th>Tool</th>\n<th>When</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Quick feature ranking</td>\n<td>Permutation importance</td>\n<td>First pass on any new model</td>\n</tr>\n<tr>\n<td>Explain one prediction to a user</td>\n<td>SHAP force plot</td>\n<td>Customer-facing explanations</td>\n</tr>\n<tr>\n<td>Understand model behavior globally</td>\n<td>SHAP summary plot</td>\n<td>Documentation, stakeholder review</td>\n</tr>\n<tr>\n<td>Detect feature interactions</td>\n<td>SHAP dependence + ICE</td>\n<td>Debugging unexpected behavior</td>\n</tr>\n<tr>\n<td>Fully transparent model</td>\n<td>LR coefficients</td>\n<td>Regulated industries, legal requirements</td>\n</tr>\n<tr>\n<td>Detect data leakage</td>\n<td>SHAP (dominant feature?)</td>\n<td>Model seems too good to be true</td>\n</tr>\n<tr>\n<td>Debug misclassifications</td>\n<td>SHAP on error samples</td>\n<td>Model underperforms on a subset</td>\n</tr>\n<tr>\n<td>Marginal feature effect</td>\n<td>PDP</td>\n<td>Communicating \"how X affects prediction\"</td>\n</tr>\n<tr>\n<td>Heterogeneity in effect</td>\n<td>ICE</td>\n<td>\"Does X always help, or only for some samples?\"</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Default workflow for any new model:</strong></span>\n<ol>\n<li>Permutation importance \u2192 confirm right features are used (5 min)</li>\n<li>SHAP summary plot \u2192 confirm directions make sense (10 min)</li>\n<li>SHAP force plots on 3\u20135 cases \u2192 sanity-check individual predictions (10 min)</li>\n<li>SHAP on worst errors \u2192 diagnose misclassification patterns (15 min)</li>\n<li>PDP for top 3 features \u2192 communication-ready charts for stakeholders (10 min)</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "2e0e18aa023f3ca0dffd6e741578bd93",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"flashcard-summary\">Flashcard Summary</h2>\n<span class=\"paragraph\"><strong>\"How do you explain a model's prediction?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">SHAP force plot for individual predictions. Shows each feature's contribution with\nmagnitude and direction, and the values sum to the prediction exactly:\nbase_value + \u03a3 SHAP = prediction.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"SHAP vs feature importance?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">Feature importance: which features matter globally. SHAP: which features matter,\nin what direction, for each individual prediction. SHAP is strictly more informative.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"What's wrong with impurity importance?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">Three traps: (1) biased toward high-cardinality features; (2) measured on training data\nso overfitting inflates noise; (3) no direction \u2014 can't tell if more experience helps\nor hurts.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"When is permutation importance better?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">Always, for general-purpose use. Works for any model, measured on validation data, not\nbiased by cardinality. Limitation: correlated features each look less important than\nthey are (they compensate for each other when shuffled).</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"What does a SHAP summary plot show?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">Global view: for each feature, the distribution of SHAP values across all predictions,\ncolored by feature value. Shows importance + direction + magnitude in one chart.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"How do you detect data leakage with SHAP?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">One feature with mean |SHAP| 5\u201310\u00d7 larger than all others is the signature of leakage.\nNothing in real data generates a signal that clean.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"PDP vs SHAP dependence plot?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">PDP: average marginal effect \u2014 hides interactions by averaging over all samples.\nSHAP dependence: per-sample contributions \u2014 reveals interactions by coloring points\nby an interaction feature.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"Why do regulators prefer logistic regression?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">Every prediction is an exact documented sum: log-odds = intercept + \u03a3(value \u00d7 coef).\nNo approximation, no game theory \u2014 each coefficient is legally defensible.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"ICE vs PDP?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">PDP is the mean curve. ICE shows individual curves per sample. If ICE lines cross,\nthere's a hidden interaction that the PDP average conceals.</span>\n</blockquote>\n<span class=\"paragraph\"><strong>\"How do you debug a model that's underperforming?\"</strong></span>\n<blockquote>\n<span class=\"paragraph\">Permutation importance (right features?), SHAP summary (right directions?), SHAP on\nworst errors (what confuses the model?). Usually reveals label noise or leakage\nfaster than any other method.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "c5a8f5235026f4247edcda672aa52b6c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"interview-talking-points\">Interview Talking Points</h2>\n<hr />\n<h3 id=\"how-do-you-explain-model-decisions\">\"How do you explain model decisions?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"I use a layered approach. Quick check: permutation importance to verify the right\nfeatures are driving predictions \u2014 takes 5 minutes. Deep dive: SHAP summary plot for\nglobal model understanding, SHAP force plots for individual prediction explanations.\nFor debugging: SHAP on misclassified samples to find data quality issues. The SHAP\nsummary plot is almost always the first thing I show stakeholders \u2014 it's the most\ninformation-dense single visualization I know of.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"how-would-you-explain-a-model-decision-to-a-non-technical-stakeholder\">\"How would you explain a model decision to a non-technical stakeholder?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"I'd use a SHAP force plot and translate it: 'This candidate scored 73%. The biggest\ndriver was skill alignment at 94% \u2014 that added the most to the score. Location matched,\nwhich was the second biggest boost. Experience was right for the level. The posting is\n37 days old, which reduced confidence slightly. Salary mismatch pulled the score down.\nEvery number here is traceable back to the actual model calculation.' No hand-waving.\nThe contributions add up to the prediction.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"how-do-you-debug-a-model-thats-underperforming\">\"How do you debug a model that's underperforming?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"Three steps. Permutation importance: are the right features being used? If noise\nfeatures rank high, I have a data or leakage issue. SHAP summary: do the directions\nmake sense? 'More experience = lower score' sends me straight to label auditing. SHAP\non the worst predictions: what drove the misses? In my experience, 80% of mysterious\nunderperformance traces back to data issues that SHAP makes visible in minutes.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"whats-the-interpretability-accuracy-trade-off\">\"What's the interpretability-accuracy trade-off?\"</h3>\n<blockquote>\n<span class=\"paragraph\">\"It's mostly a myth. SHAP gives you interpretability on top of any model \u2014 you don't\nsacrifice accuracy. The real cost is compute: exact Shapley values are exponential in\nfeatures. TreeExplainer makes it practical for any tree-based model in O(TLD\u00b2) time.\nFor neural nets, SHAP's DeepExplainer or KernelExplainer are slower but still practical\nfor offline analysis.\"</span>\n</blockquote>\n<hr />\n<h3 id=\"connection-to-my-work\">Connection to my work</h3>\n<span class=\"paragraph\"><strong>Fraud detection system design:</strong> SHAP values generate the human-readable reason codes\nfor transaction declines \u2014 \"unusual location,\" \"rapid purchase sequence,\" \"new device.\"\nThe XGBoost model scores the transaction; SHAP decomposes the score into per-feature\ncontributions that become the decline reason. Regulators get full documentation;\ncustomers get an actionable explanation.</span>\n<span class=\"paragraph\"><strong>Canopy (job recommendations):</strong> SHAP explains job scores to candidates \u2014 \"this role\nscored 8.5 because your skills match 94% of requirements and the location fits. The\nsalary is slightly above your stated range, which pulled it down slightly.\" SHAP makes\nthe recommendation system both debuggable and user-facing, with no extra engineering\nbeyond what the model already computes.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
